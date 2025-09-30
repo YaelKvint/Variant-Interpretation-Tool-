@@ -1,0 +1,28 @@
+Pathogenic combinations: 
+1. PVS, PS
+2. PVS, PM, PM
+3. PVS, PM, PP
+4. PVS, PP, PP
+5. PS, PS
+6. PS, PM, PM, PM
+7. PS, PM, PM, PP, PP
+8. PS, PM, PP, PP, PP, PP
+
+Likely pathogenic combinations: 
+1. PVS, PM
+2. PS, PM
+3. PS, PP, PP
+4. PM, PM, PM
+5. PM, PM, PP, PP
+6. PM, PP, PP, PP, PP
+
+Likely benign combinations: 
+1. BS, BP
+2. BP, BP
+
+Benign combinations: 
+1. BA
+2. BS, BS
+
+VUS:
+Any other combination or the criteria for benign and pathogenic are contradictory

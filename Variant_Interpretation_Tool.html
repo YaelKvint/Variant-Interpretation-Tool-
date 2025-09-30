@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ACMG Criteria Checklist</title>
+  <style>
+    :root{
+      --red:#b30000;--orange:#e07b00;--yellow:#e6c200;--green:#0b9b2a;--blue:#0033b3;
+      /* Keep all notes perfectly aligned across rows, but responsive */
+      --note-col: clamp(360px, 42vw, 560px);
+      /* Fixed widths for the two dropdowns so they match in every row */
+      --level-w: 160px;
+      --tools-w: 220px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, Arial, sans-serif;margin:0;background:#f7f8fa;color:#111}
+    h1{margin:0 0 8px}
+
+    /* Top header */
+    .header{
+      position:relative; display:flex; gap:12px; align-items:center; margin-bottom:12px;
+      padding:12px; background:linear-gradient(90deg, #b30000 0%, #0033b3 100%); color:white;
+      box-shadow:0 2px 6px rgba(0,0,0,0.15)
+    }
+    .header-left{flex:1;display:flex;flex-direction:column;gap:8px}
+    .top-row{display:flex;gap:12px;align-items:center}
+    input.variant-name{flex:0 1 58%;padding:8px 10px;font-size:16px;border:1px solid #ccc;border-radius:6px}
+    .pathogenic{color:var(--red)} .benign{color:var(--blue)}
+    .classification{display:flex;gap:12px;align-items:center}
+    .badge{
+      padding:10px 16px;border-radius:999px;font-weight:800;letter-spacing:0.5px;font-size:18px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.15);
+      background-clip: padding-box; backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+    }
+    .patient-notes{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+    .patient-notes label{font-size:13px;color:#fff;opacity:0.9}
+    .patient-notes textarea{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff;color:#111;min-height:56px;resize:vertical}
+
+    #classificationReason{font-size:18px; line-height:1.2}
+    .muted{color:#ddd;font-size:13px}
+    .muted a{color:#fff;text-decoration:underline}
+    .muted a:hover{opacity:0.9}
+
+    /* Settings gear (top-right of header) */
+    .gear-wrap{position:absolute;top:8px;right:8px}
+    .gear{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;background:#fff;cursor:pointer;color:black}
+    .settings-panel{position:absolute;right:0;top:44px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:240px;z-index:1200}
+    .settings-panel.hidden{display:none}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:14px;color:#111}
+    .settings-row div{flex:1}
+    .settings-actions{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid #bbb;background:#fff;cursor:pointer}
+
+    /* Selected criteria box */
+    .selected-box{border:2px dashed #888;padding:10px;border-radius:8px;margin:12px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
+    .selected-item{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;margin:6px 6px 0 0;font-weight:700;transition:background 0.2s ease}
+    .selected-item:hover{background:rgba(0,0,0,0.08)!important}
+
+    /* Checklist area */
+    .category{padding:12px;border-radius:8px;margin:12px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
+    .category:nth-child(odd){background:#f9fbff}
+    .category h2{font-size:18px;margin:0 0 8px;font-weight:900}
+
+    /* Grid: [left | notes | controls] with fixed, shared notes column */
+    .code-row{
+      display:grid;
+      grid-template-columns: minmax(260px, 1fr) var(--note-col) auto;
+      gap:12px;
+      align-items:start;
+      padding:6px 4px;
+    }
+    .code-row.disabled{opacity:0.45}
+
+    .left{min-width:240px;display:flex;flex-direction:column}
+    .code-label{font-weight:800;font-size:15px}
+    .desc{
+      font-size:13px;color:#555;margin-top:3px;
+      overflow-wrap:anywhere; word-break:break-word;
+    }
+
+    /* Notes column (aligned globally by the shared grid column) */
+    .code-note{
+      width:100%; min-height:44px; resize:vertical; padding:8px;
+      border:1px solid #ccc; border-radius:6px; font-size:13px; background:#fff; color:#111
+    }
+
+    /* Controls pinned at far right */
+    .controls{
+      display:flex; flex-direction:row; gap:8px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-start; justify-self:end;
+    }
+    /* Uniform dropdown sizes everywhere */
+    select.level, select.tools{
+      padding:6px; border-radius:6px; border:1px solid #bbb; font-weight:700; white-space:nowrap; height:36px;
+    }
+    select.level{ width:var(--level-w) }
+    select.tools{ width:var(--tools-w) }
+
+    button.bypass{padding:6px 8px;border-radius:6px;border:1px dashed #666;background:#fff;font-size:13px;cursor:pointer;height:36px}
+    button.bypass.active{border-style:solid;background:#eef9ef}
+
+    /* Sticky helpers */
+    .sticky{position:sticky;top:0;z-index:1100}
+
+    /* Progress indicator */
+    #progressCount{font-size:14px;font-weight:600;color:#fff;background:rgba(0,0,0,0.2);padding:4px 10px;border-radius:20px}
+
+    /* Responsive tweaks */
+    @media (max-width:900px){
+      .left{min-width:160px}
+      .code-row{grid-template-columns: 1fr}
+      .controls{justify-self:start}
+      .top-row{flex-wrap:wrap}
+      input.variant-name{flex:1 1 auto}
+      .badge{font-size:16px;padding:8px 12px}
+      #classificationReason{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="header" id="headerContainer">
+    <div class="header-left">
+      <div class="top-row">
+        <input class="variant-name" id="variantName" placeholder="Variant name (e.g. NM_000546.6:c.215C>G / TP53 p.R72P)" />
+        <div class="classification" id="classificationArea">
+          <div id="classificationBadge" class="badge" style="background:rgba(230,194,0,0.12);color:var(--yellow)">VUS</div>
+          <div id="classificationReason" class="muted">No decisive combination matched.</div>
+        </div>
+      </div>
+
+      <div class="patient-notes">
+        <label for="patientNotes">Patient / Case notes (optional)</label>
+        <textarea id="patientNotes" placeholder="Add phenotype, family history, inheritance, zygosity, QC flags, relevant labs, etc."></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="muted">
+          Tip: select codes and choose level. Use ⚙️ for settings.
+          • Check <a href="https://cspec.genome.network/cspec/ui/svi/" target="_blank" rel="noopener">ClinGen's registry</a> for gene-specific guidelines before starting.
+        </div>
+        <div id="progressCount">0 criteria selected</div>
+      </div>
+    </div>
+
+    <div class="gear-wrap">
+      <div class="gear" id="gearBtn" title="Settings (pin, export, import, reset)">⚙️</div>
+      <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-row"><div>Pin Header</div><input type="checkbox" id="pinHeader" /></div>
+        <div class="settings-row"><div>Pin Selected Criteria</div><input type="checkbox" id="pinSelected" /></div>
+        <div class="settings-actions">
+          <button class="btn" id="clearAllBtn">Clear All Selections</button>
+          <button class="btn" id="resetBypassBtn">Reset Bypasses</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="exportBtn">Export (JSON)</button>
+            <button class="btn" id="importBtn" type="button">Import</button>
+            <input type="file" id="importInput" accept="application/json" style="display:none"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="selectedBox" class="selected-box">
+    <h3 style="margin:0 0 8px">Selected Criteria</h3>
+    <div id="selectedList" class="muted">No criteria selected yet.</div>
+  </div>
+
+  <div id="checklist"></div>
+
+  <script>
+    // === Configuration ===
+    const categories = [
+      { name: 'Molecular consequence', codes: [
+          {code:'PVS1',type:'pathogenic',desc:'Null (loss-of-function) variant in a gene where LoF is known mechanism.'},
+          {code:'PS1',type:'pathogenic',desc:'Same amino acid change as an established pathogenic variant (different nucleotide change).'},
+          {code:'PM5',type:'pathogenic',desc:'Novel missense at residue where other pathogenic missense seen.'},
+          {code:'PM4',type:'pathogenic',desc:'Protein length change due to in-frame indels or stop-loss.'},
+          {code:'PP2',type:'pathogenic',desc:'Missense variant in a gene with low benign tolerance and where missense is disease mechanism.'},
+          {code:'BP1',type:'benign',desc:'Missense variant in a gene where only truncating variants cause disease.'},
+          {code:'BP3',type:'benign',desc:'In-frame indel in a repetitive region without known function.'},
+          {code:'BP7',type:'benign',desc:'Synonymous variant with no predicted splicing impact and low conservation.'}
+        ]},
+      { name: 'Population Data', codes: [
+          {code:'PM2',type:'pathogenic',desc:'Absent or extremely low frequency in population databases.'},
+          {code:'BA1',type:'benign',desc:'Allele frequency is higher than expected for disorder (stand-alone benign).'},
+          {code:'BS1',type:'benign',desc:'Allele frequency greater than expected for disorder (strong benign).'}
+        ]},
+      { name: 'Computational', codes: [
+          {code:'PP3',type:'pathogenic',desc:'Multiple computational tools predict a deleterious effect.'},
+          {code:'BP4',type:'benign',desc:'Multiple computational tools predict no impact.'}
+        ]},
+      { name: 'Functional Studies', codes: [
+          {code:'PS3',type:'pathogenic',desc:'Well-established functional studies demonstrate a damaging effect.'},
+          {code:'BS3',type:'benign',desc:'Well-established functional studies show no damaging effect.'}
+        ]},
+      { name: 'Case Data - De Novo', codes: [
+          {code:'PS2',type:'pathogenic',desc:'De novo occurrence (confirmed) in a patient with the disease and no family history.'},
+          {code:'PM6',type:'pathogenic',desc:'De novo occurrence (assumed) without full confirmation.'}
+        ]},
+      { name: 'Case Data - Segregation', codes: [
+          {code:'PP1',type:'pathogenic',desc:'Cosegregation with disease in multiple affected family members.'},
+          {code:'BS4',type:'benign',desc:'Lack of segregation in affected family members (strong benign).'}
+        ]},
+      { name: 'Case Data - Case-control/Prevalence', codes: [
+          {code:'PS4',type:'pathogenic',desc:'Statistically significant increased prevalence in affected vs controls.'},
+          {code:'BS2',type:'benign',desc:'Observed in healthy adults with full penetrance expected for the disorder (strong benign).'}
+        ]},
+      { name: 'Protein Domain', codes: [
+          {code:'PM1',type:'pathogenic',desc:'Located in a mutational hotspot or critical functional domain without benign variation.'}
+        ]},
+      { name: 'Phenotype/Alternative Molecular Basis', codes: [
+          {code:'PM3',type:'pathogenic',desc:'Detected in trans with a pathogenic variant for a recessive disorder (case-level evidence).'},
+          {code:'PP4',type:'pathogenic',desc:'Phenotype or family history is highly specific for a disease with a single genetic cause.'},
+          {code:'BP2',type:'benign',desc:'Observed in trans with a pathogenic variant for a dominant disorder or in cis for recessive (supports benign).'},
+          {code:'BP5',type:'benign',desc:'Variant found in a case with an alternate molecular cause for disease.'}
+        ]}
+    ];
+
+    const doubleDips = {
+      'BA1':['BS1','PM2','PS4'],
+      'BS1':['BA1','PM2','PS4'],
+      'PM2':['BA1','BS1','PS4'],
+      'PS4':['BA1','BS1','PM2'],
+      'PP3':['BP4','PVS1'],
+      'BP4':['PP3'],
+      'PVS1':['PP3','PM4','BP7'],
+      'PM4':['PVS1'],
+      'BP7':['PVS1'],
+      'PP1':['BS4'],
+      'BS4':['PP1'],
+      'PS3':['BS3'],
+      'BS3':['PS3'],
+      'PS2':['PM6'],
+      'PM6':['PS2']
+    };
+
+    // ========== Tools config (Students: paste your tool links here) ==========
+    // Add your links under each code as an array of { label, url } objects.
+    const toolsConfig = {
+      // Molecular consequence
+      PVS1: [
+        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
+        { label: 'OMIM', url: 'https://www.omim.org/' },
+        { label: 'DECIPHER OEUF Scores', url: 'https://www.deciphergenomics.org/' },
+        { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
+      ],
+      PS1: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
+      ],
+      PM5: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
+      ],
+      PM4: [],
+      PP2: [
+        { label: 'gnomAD z-score', url: 'https://gnomad.broadinstitute.org/' }
+      ],
+      BP1: [
+        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' }
+      ],
+      BP3: [
+        { label: 'RepeatMasker', url: 'https://www.repeatmasker.org/' }
+      ],
+      BP7: [
+        { label: 'Franklin: SpliceAI', url: 'https://franklin.genoox.com/clinical-db/home' }
+      ],
+
+      // Population Data
+      PM2: [
+        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
+      ],
+      BA1: [
+        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
+      ],
+      BS1: [
+        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
+      ],
+
+      // Computational
+      PP3: [
+        { label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }
+      ],
+      BP4: [
+        { label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }
+      ],
+
+      // Functional Studies
+      PS3: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' },
+        { label: 'ClinGen Evidence Repository', url: 'https://erepo.clinicalgenome.org/evrepo/' },
+        { label: 'MAVEdb.org', url: 'https://www.mavedb.org/' }
+      ],
+      BS3: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' },
+        { label: 'ClinGen Evidence Repository', url: 'https://erepo.clinicalgenome.org/evrepo/' },
+        { label: 'MAVEdb.org', url: 'https://www.mavedb.org/' }
+      ],
+
+      // Case Data - De Novo
+      PS2: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' }, 
+        { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
+      ],
+      PM6: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' }, 
+        { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
+      ],
+
+      // Case Data - Segregation
+      PP1: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+      BS4: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+
+      // Case Data - Case-control/Prevalence
+      PS4: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+      BS2: [
+        { label: 'gnomAD homozygotes', url: 'https://gnomad.broadinstitute.org/' }
+      ],
+
+      // Protein Domain
+      PM1: [
+        { label: 'UniProt', url: 'https://www.uniprot.org/' },
+        { label: 'InterPro', url: 'https://www.ebi.ac.uk/interpro/' },
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
+      ],
+
+      // Phenotype/Alternative Molecular Basis
+      PM3: [],
+      PP4: [	
+        { label: 'OMIM', url: 'https://www.omim.org/' }, 
+        { label: 'HPO', url: 'https://hpo.jax.org/' },
+        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
+        { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
+      ],
+      BP2: [],
+      BP5: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
+      ]
+    };
+    // ========================================================================
+
+    const checklistDiv = document.getElementById('checklist');
+    const codeElements = {};
+    const bypassedCodes = new Set();
+
+    function createToolsDropdown(code){
+      const sel = document.createElement('select');
+      sel.className = 'tools';
+      sel.title = `Tools for ${code} (configure in toolsConfig)`;
+      const def = document.createElement('option');
+      def.value = ''; def.text = 'Recommended Tools'; def.selected = true;
+      sel.appendChild(def);
+      const items = Array.isArray(toolsConfig[code]) ? toolsConfig[code] : [];
+      if(items.length){
+        items.forEach(t=>{
+          const o = document.createElement('option');
+          o.value = t.url; o.text = t.label || t.url; sel.appendChild(o);
+        });
+      } else {
+        const hint = document.createElement('option');
+        hint.value = ''; hint.text = 'Add tools in toolsConfig (JS)'; hint.disabled = true; sel.appendChild(hint);
+      }
+      sel.addEventListener('change', (e)=>{
+        const url = e.target.value;
+        if(url){ window.open(url, '_blank', 'noopener'); }
+        e.target.selectedIndex = 0;
+      });
+      return sel;
+    }
+
+    function createCategory(cat){
+      const wrap = document.createElement('div'); wrap.className='category';
+      const title = document.createElement('h2'); title.innerText = cat.name; wrap.appendChild(title);
+
+      cat.codes.forEach(item=>{
+        if(codeElements[item.code]) return;
+
+        const row = document.createElement('div'); row.className='code-row';
+
+        // Left
+        const left = document.createElement('div'); left.className='left';
+        const topLine = document.createElement('div'); topLine.style.display='flex'; topLine.style.gap='8px'; topLine.style.alignItems='center';
+        const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.id = 'chk_'+item.code; checkbox.style.marginLeft='2px';
+        const label = document.createElement('label'); label.className='code-label'; label.htmlFor=checkbox.id;
+        label.innerHTML = `<span class='${item.type==='pathogenic'?'pathogenic':'benign'}'>${item.code}</span>`;
+        topLine.appendChild(checkbox); topLine.appendChild(label);
+
+        // Description (inject a line break for PS1 to keep row flow consistent)
+        const desc = document.createElement('div'); desc.className='desc'; desc.dataset.code = item.code;
+        if(item.code === 'PS1'){
+          const idx = item.desc.indexOf(' (');
+          if(idx > 0){
+            const first = item.desc.slice(0, idx);
+            const rest = item.desc.slice(idx + 1);
+            desc.innerHTML = `${first}<br>${rest}`;
+          } else {
+            desc.innerText = item.desc;
+          }
+        } else {
+          desc.innerText = item.desc;
+        }
+
+        left.appendChild(topLine); left.appendChild(desc);
+
+        // Middle (aligned notes)
+        const note = document.createElement('textarea'); note.className='code-note'; note.placeholder = `Notes for ${item.code} (optional)`;
+
+        // Right controls
+        const controls = document.createElement('div'); controls.className='controls';
+        const select = document.createElement('select'); select.className='level';
+        const placeholder = document.createElement('option'); placeholder.value=''; placeholder.text='Select level'; placeholder.selected=true; select.appendChild(placeholder);
+        ['Supporting','Moderate','Strong'].forEach(opt=>{const o=document.createElement('option'); o.value = opt; o.text = opt; select.appendChild(o)});
+        const toolsDropdown = createToolsDropdown(item.code);
+        const bypassBtn = document.createElement('button'); bypassBtn.className='bypass'; bypassBtn.innerText='Bypass'; bypassBtn.style.display='none';
+
+        controls.appendChild(select); controls.appendChild(toolsDropdown); controls.appendChild(bypassBtn);
+
+        // Compose row
+        row.appendChild(left); row.appendChild(note); row.appendChild(controls);
+        wrap.appendChild(row);
+
+        codeElements[item.code] = {row,checkbox,select,bypassBtn,type:item.type,note};
+
+        // Events
+        checkbox.addEventListener('change',()=>onToggleCode(item.code, checkbox.checked));
+        select.addEventListener('change',()=>{ updateSelectedDisplay(); computeClassification(); });
+        bypassBtn.addEventListener('click',()=>{ toggleBypass(item.code); });
+      });
+
+      checklistDiv.appendChild(wrap);
+      return wrap;
+    }
+
+    // Build UI
+    categories.forEach(cat=>createCategory(cat));
+
+    function inst(code){ return codeElements[code]; }
+
+    function recomputeDisables(){
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
+        if(bypassedCodes.has(code)){
+          e.bypassBtn.style.display = ''; e.bypassBtn.classList.add('active'); e.bypassBtn.innerText = 'Bypass: ON';
+        } else {
+          e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
+        }
+      });
+      Object.keys(doubleDips).forEach(master=>{
+        const m = inst(master);
+        if(!m || !m.checkbox.checked) return;
+        if(bypassedCodes.has(master)) return;
+        const conflicts = doubleDips[master] || [];
+        conflicts.forEach(c=> toggleDisableForCode(c, true));
+      });
+    }
+
+    function onToggleCode(code, checked){
+      recomputeDisables();
+      updateSelectedDisplay();
+      computeClassification();
+    }
+
+    function toggleBypass(code){
+      const e = inst(code);
+      if(!e) return;
+      if(bypassedCodes.has(code)){
+        bypassedCodes.delete(code);
+        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
+        if(e.checkbox.checked){ e.checkbox.checked = false; }
+        e.select.selectedIndex = 0;
+      } else {
+        bypassedCodes.add(code);
+        e.bypassBtn.classList.add('active'); e.bypassBtn.innerText = 'Bypass: ON'; e.bypassBtn.style.display = '';
+      }
+      recomputeDisables();
+      updateSelectedDisplay();
+      computeClassification();
+    }
+
+    function toggleDisableForCode(code, disable){
+      const e = inst(code);
+      if(!e) return;
+      if(bypassedCodes.has(code) && disable){
+        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
+        e.bypassBtn.style.display = ''; e.bypassBtn.classList.add('active'); e.bypassBtn.innerText = 'Bypass: ON';
+        return;
+      }
+      if(disable){
+        e.row.classList.add('disabled'); e.checkbox.disabled=true; e.select.disabled=true;
+        e.bypassBtn.style.display = ''; e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass';
+      } else {
+        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
+        if(!bypassedCodes.has(code)) e.bypassBtn.style.display = 'none';
+      }
+    }
+
+    function updateSelectedDisplay(){
+      const container = document.getElementById('selectedList');
+      container.innerHTML = '';
+      const selected = [];
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        if(e.checkbox.checked){
+          const level = e.select.value;
+          const label = level ? `${code}_${level}` : code;
+          selected.push({label, type:e.type});
+        }
+      });
+      const progress = document.getElementById('progressCount');
+      progress.textContent = `${selected.length} criteria selected`;
+
+      if(selected.length===0){ container.innerHTML = '<span class="muted">No criteria selected yet.</span>'; return }
+      selected.forEach(s=>{
+        const span = document.createElement('span'); span.className='selected-item';
+        span.style.background = s.type==='pathogenic'? 'rgba(179,0,0,0.12)':'rgba(0,51,179,0.06)';
+        span.style.color = s.type==='pathogenic'? 'var(--red)':'var(--blue)';
+        span.innerText = s.label;
+        container.appendChild(span);
+      });
+    }
+
+    function getEvidenceStrength(code, level){
+      const m = code.match(/^[A-Z]+/); const prefix = m ? m[0] : code;
+      if(prefix==='BA') return 'BA';
+      if(['PVS','PS','PM','PP'].includes(prefix)){
+        if(level==='Strong') return 'PS';
+        if(level==='Moderate') return 'PM';
+        if(level==='Supporting') return 'PP';
+        if(prefix==='PVS') return 'PVS'; if(prefix==='PS') return 'PS'; if(prefix==='PM') return 'PM'; if(prefix==='PP') return 'PP';
+      }
+      if(['BS','BP'].includes(prefix)){ if(level==='Strong') return 'BS'; return prefix; }
+      return 'PP';
+    }
+
+    function computeClassification(){
+      const counts = {PVS:0,PS:0,PM:0,PP:0,BA:0,BS:0,BP:0};
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        if(e.checkbox.checked){
+          const strength = getEvidenceStrength(code, e.select.value);
+          if(counts.hasOwnProperty(strength)) counts[strength] += 1;
+        }
+      });
+
+      const pathSum = counts.PVS + counts.PS + counts.PM + counts.PP;
+      const benignSum = counts.BA + counts.BS + counts.BP;
+
+      if(benignSum > 0 && pathSum > 0) return setClassification('VUS','Contradictory pathogenic and benign evidence selected.');
+      if(counts.PVS >=1 && counts.PS >=1) return setClassification('Pathogenic','Rule: PVS + PS');
+      if(counts.PVS >=1 && counts.PM >=2) return setClassification('Pathogenic','Rule: PVS + 2xPM');
+      if(counts.PVS >=1 && counts.PM >=1 && counts.PP >=1) return setClassification('Pathogenic','Rule: PVS + PM + PP');
+      if(counts.PVS >=1 && counts.PP >=2) return setClassification('Pathogenic','Rule: PVS + 2xPP');
+      if(counts.PS >=2) return setClassification('Pathogenic','Rule: 2xPS');
+      if(counts.PS >=1 && counts.PM >=3) return setClassification('Pathogenic','Rule: PS + 3xPM');
+      if(counts.PS >=1 && counts.PM >=2 && counts.PP >=2) return setClassification('Pathogenic','Rule: PS + 2xPM + 2xPP');
+      if(counts.PS >=1 && counts.PM >=1 && counts.PP >=4) return setClassification('Pathogenic','Rule: PS + PM + 4xPP');
+
+      if(counts.PVS >=1 && counts.PM >=1) return setClassification('Likely pathogenic','Rule: PVS + PM');
+      if(counts.PS >=1 && counts.PM >=1) return setClassification('Likely pathogenic','Rule: PS + PM');
+      if(counts.PS >=1 && counts.PP >=2) return setClassification('Likely pathogenic','Rule: PS + 2xPP');
+      if(counts.PM >=3) return setClassification('Likely pathogenic','Rule: 3xPM');
+      if(counts.PM >=2 && counts.PP >=2) return setClassification('Likely pathogenic','Rule: 2xPM + 2xPP');
+      if(counts.PM >=1 && counts.PP >=4) return setClassification('Likely pathogenic','Rule: PM + 4xPP');
+
+      if(counts.BA >=1) return setClassification('Benign','Rule: BA (stand-alone)');
+      if(counts.BS >=2) return setClassification('Benign','Rule: 2xBS');
+
+      if(counts.BS >=1 && counts.BP >=1) return setClassification('Likely benign','Rule: BS + BP');
+      if(counts.BP >=2) return setClassification('Likely benign','Rule: 2xBP');
+
+      return setClassification('VUS','No definitive combination matched.');
+    }
+
+    function setClassification(label,reason){
+      const badge = document.getElementById('classificationBadge');
+      const reasonEl = document.getElementById('classificationReason');
+      reasonEl.innerText = reason || '';
+      badge.innerText = label;
+      if(label==='Pathogenic'){ badge.style.background = 'rgba(179,0,0,0.22)'; badge.style.color = 'var(--red)'; }
+      else if(label==='Likely pathogenic'){ badge.style.background = 'rgba(224,123,0,0.12)'; badge.style.color = 'var(--orange)'; }
+      else if(label==='VUS'){ badge.style.background = 'rgba(230,194,0,0.12)'; badge.style.color = 'var(--yellow)'; }
+      else if(label==='Likely benign'){ badge.style.background = 'rgba(11,155,42,0.08)'; badge.style.color = 'var(--green)'; }
+      else if(label==='Benign'){ badge.style.background = 'rgba(0,51,179,0.06)'; badge.style.color = 'var(--white)'; }
+      return {label,reason};
+    }
+
+    // Settings panel behavior
+    const gearBtn = document.getElementById('gearBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const pinHeader = document.getElementById('pinHeader');
+    const pinSelected = document.getElementById('pinSelected');
+    const headerContainer = document.getElementById('headerContainer');
+    const selectedBox = document.getElementById('selectedBox');
+
+    gearBtn.addEventListener('click', ()=> settingsPanel.classList.toggle('hidden'));
+    document.addEventListener('click', (e)=>{
+      if(!document.getElementById('gearBtn').contains(e.target) && !settingsPanel.contains(e.target)){
+        settingsPanel.classList.add('hidden');
+      }
+    });
+
+    function updateStickyOffsets(){
+      const headerPinned = pinHeader.checked;
+      const selectedPinned = pinSelected.checked;
+      headerContainer.style.zIndex = headerPinned ? 1200 : '';
+      if(selectedPinned){
+        const headerHeight = headerPinned ? headerContainer.offsetHeight : 0;
+        selectedBox.style.top = headerHeight + 'px';
+        selectedBox.style.zIndex = headerPinned ? 1100 : '';
+      } else {
+        selectedBox.style.top = '';
+        selectedBox.style.zIndex = '';
+      }
+    }
+    pinHeader.addEventListener('change', ()=>{ headerContainer.classList.toggle('sticky', pinHeader.checked); updateStickyOffsets(); });
+    pinSelected.addEventListener('change', ()=>{ selectedBox.classList.toggle('sticky', pinSelected.checked); updateStickyOffsets(); });
+    window.addEventListener('resize', updateStickyOffsets);
+
+    // Clear/Reset
+    document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+      bypassedCodes.clear();
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        e.checkbox.checked = false; e.select.selectedIndex = 0;
+        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
+        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
+        if(e.note) e.note.value = '';
+      });
+      document.getElementById('patientNotes').value = '';
+      updateSelectedDisplay();
+      computeClassification();
+    });
+
+    document.getElementById('resetBypassBtn').addEventListener('click', ()=>{
+      bypassedCodes.clear();
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
+        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
+      });
+      Object.keys(codeElements).forEach(master=>{
+        const m = inst(master);
+        if(m && m.checkbox.checked){
+          const conflicts = doubleDips[master] || [];
+          conflicts.forEach(c=> toggleDisableForCode(c,true));
+        }
+      });
+      updateSelectedDisplay();
+      computeClassification();
+    });
+
+    // Export/Import
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const payload = buildExportJSON();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = (payload.variant||'variant') + '_acmg.json';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+    document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
+    document.getElementById('importInput').addEventListener('change', (ev)=>{
+      const file = ev.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        try{ const data = JSON.parse(e.target.result); applyImportJSON(data); }
+        catch(err){ alert('Invalid JSON file'); }
+      };
+      reader.readAsText(file);
+      ev.target.value = '';
+    });
+
+    function buildExportJSON(){
+      const out = {variant: document.getElementById('variantName').value, patientNotes: document.getElementById('patientNotes').value || '', criteria: [], notes: {}, bypasses: Array.from(bypassedCodes)};
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        if(e.checkbox.checked){ out.criteria.push({code, level: e.select.value || null}); }
+        if(e.note && e.note.value && e.note.value.trim()!==''){ out.notes[code] = e.note.value; }
+      });
+      out.classification = computeClassification();
+      return out;
+    }
+
+    function applyImportJSON(data){
+      if(data.variant!==undefined) document.getElementById('variantName').value = data.variant || '';
+      document.getElementById('patientNotes').value = data.patientNotes || '';
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        e.checkbox.checked = false; e.select.selectedIndex = 0;
+        if(e.note) e.note.value = '';
+        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText='Bypass'; e.bypassBtn.style.display='none';
+      });
+      bypassedCodes.clear();
+
+      if(Array.isArray(data.bypasses)){ data.bypasses.forEach(code=>{ if(inst(code)) bypassedCodes.add(code); }); }
+      if(Array.isArray(data.criteria)){
+        data.criteria.forEach(item=>{
+          const e = inst(item.code);
+          if(e){
+            e.checkbox.checked = true;
+            if(item.level){
+              for(let i=0;i<e.select.options.length;i++){ if(e.select.options[i].value === item.level){ e.select.selectedIndex = i; break } }
+            } else { e.select.selectedIndex = 0; }
+          }
+        });
+      }
+      if(data.notes && typeof data.notes === 'object'){
+        Object.keys(data.notes).forEach(code=>{ const e = inst(code); if(e && e.note){ e.note.value = data.notes[code] || ''; } });
+      }
+
+      recomputeDisables();
+      updateSelectedDisplay();
+      computeClassification();
+    }
+
+    // Initial
+    recomputeDisables();
+    computeClassification();
+    updateStickyOffsets();
+
+    // PS1 description line-break applied during element creation above.
+  </script>
+</body>
+</html>
