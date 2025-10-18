@@ -1,28 +1,38 @@
-Pathogenic combinations: 
-1. PVS, PS
-2. PVS, PM, PM
-3. PVS, PM, PP
-4. PVS, PP, PP
-5. PS, PS
-6. PS, PM, PM, PM
-7. PS, PM, PM, PP, PP
-8. PS, PM, PP, PP, PP, PP
+function computeClassification(){
+      const counts = {PVS:0,PS:0,PM:0,PP:0,BA:0,BS:0,BP:0};
+      Object.keys(codeElements).forEach(code=>{
+        const e = inst(code);
+        if(e.checkbox.checked){
+          const strength = getEvidenceStrength(code, e.select.value);
+          if(counts.hasOwnProperty(strength)) counts[strength] += 1;
+        }
+      });
 
-Likely pathogenic combinations: 
-1. PVS, PM
-2. PS, PM
-3. PS, PP, PP
-4. PM, PM, PM
-5. PM, PM, PP, PP
-6. PM, PP, PP, PP, PP
+      const pathSum = counts.PVS + counts.PS + counts.PM + counts.PP;
+      const benignSum = counts.BA + counts.BS + counts.BP;
 
-Likely benign combinations: 
-1. BS, BP
-2. BP, BP
+      if(benignSum > 0 && pathSum > 0) return setClassification('VUS','Contradictory pathogenic and benign evidence selected.');
+      if(counts.PVS >=1 && counts.PS >=1) return setClassification('Pathogenic','Rule: PVS + PS');
+      if(counts.PVS >=1 && counts.PM >=2) return setClassification('Pathogenic','Rule: PVS + 2xPM');
+      if(counts.PVS >=1 && counts.PM >=1 && counts.PP >=1) return setClassification('Pathogenic','Rule: PVS + PM + PP');
+      if(counts.PVS >=1 && counts.PP >=2) return setClassification('Pathogenic','Rule: PVS + 2xPP');
+      if(counts.PS >=2) return setClassification('Pathogenic','Rule: 2xPS');
+      if(counts.PS >=1 && counts.PM >=3) return setClassification('Pathogenic','Rule: PS + 3xPM');
+      if(counts.PS >=1 && counts.PM >=2 && counts.PP >=2) return setClassification('Pathogenic','Rule: PS + 2xPM + 2xPP');
+      if(counts.PS >=1 && counts.PM >=1 && counts.PP >=4) return setClassification('Pathogenic','Rule: PS + PM + 4xPP');
 
-Benign combinations: 
-1. BA
-2. BS, BS
+      if(counts.PVS >=1 && counts.PM >=1) return setClassification('Likely pathogenic','Rule: PVS + PM');
+      if(counts.PS >=1 && counts.PM >=1) return setClassification('Likely pathogenic','Rule: PS + PM');
+      if(counts.PS >=1 && counts.PP >=2) return setClassification('Likely pathogenic','Rule: PS + 2xPP');
+      if(counts.PM >=3) return setClassification('Likely pathogenic','Rule: 3xPM');
+      if(counts.PM >=2 && counts.PP >=2) return setClassification('Likely pathogenic','Rule: 2xPM + 2xPP');
+      if(counts.PM >=1 && counts.PP >=4) return setClassification('Likely pathogenic','Rule: PM + 4xPP');
 
-VUS:
-Any other combination or the criteria for benign and pathogenic are contradictory
+      if(counts.BA >=1) return setClassification('Benign','Rule: BA (stand-alone)');
+      if(counts.BS >=2) return setClassification('Benign','Rule: 2xBS');
+
+      if(counts.BS >=1 && counts.BP >=1) return setClassification('Likely benign','Rule: BS + BP');
+      if(counts.BP >=2) return setClassification('Likely benign','Rule: 2xBP');
+
+      return setClassification('VUS','No definitive combination matched.');
+    }
