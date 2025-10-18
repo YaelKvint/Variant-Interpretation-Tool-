@@ -7,45 +7,82 @@
   <style>
     :root{
       --red:#b30000;--orange:#e07b00;--yellow:#e6c200;--green:#0b9b2a;--blue:#0033b3;
-      /* Keep all notes perfectly aligned across rows, but responsive */
       --note-col: clamp(360px, 42vw, 560px);
-      /* Fixed widths for the two dropdowns so they match in every row */
       --level-w: 160px;
-      --tools-w: 220px;
+      --tools-w: 160px;
     }
     *{box-sizing:border-box}
     body{font-family:Inter, Arial, sans-serif;margin:0;background:#f7f8fa;color:#111}
-    h1{margin:0 0 8px}
 
-    /* Top header */
+    /* Header */
     .header{
       position:relative; display:flex; gap:12px; align-items:center; margin-bottom:12px;
       padding:12px; background:linear-gradient(90deg, #b30000 0%, #0033b3 100%); color:white;
       box-shadow:0 2px 6px rgba(0,0,0,0.15)
     }
-    .header-left{flex:1;display:flex;flex-direction:column;gap:8px}
-    .top-row{display:flex;gap:12px;align-items:center}
-    input.variant-name{flex:0 1 58%;padding:8px 10px;font-size:16px;border:1px solid #ccc;border-radius:6px}
-    .pathogenic{color:var(--red)} .benign{color:var(--blue)}
+    .header-left{flex:1;display:flex;flex-direction:column;gap:10px}
+    .top-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    input.variant-name{flex:0 1 480px;min-width:280px;padding:8px 10px;font-size:16px;border:1px solid #ccc;border-radius:6px}
     .classification{display:flex;gap:12px;align-items:center}
+
+    /* Glassy-white classification badge */
     .badge{
       padding:10px 16px;border-radius:999px;font-weight:800;letter-spacing:0.5px;font-size:18px;
       box-shadow:0 2px 6px rgba(0,0,0,0.15);
+      background:rgba(255,255,255,0.75);
+      border:1px solid rgba(0,0,0,0.08);
       background-clip: padding-box; backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
     }
-    .patient-notes{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-    .patient-notes label{font-size:13px;color:#fff;opacity:0.9}
-    .patient-notes textarea{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff;color:#111;min-height:56px;resize:vertical}
 
     #classificationReason{font-size:18px; line-height:1.2}
     .muted{color:#ddd;font-size:13px}
     .muted a{color:#fff;text-decoration:underline}
     .muted a:hover{opacity:0.9}
 
-    /* Settings gear (top-right of header) */
-    .gear-wrap{position:absolute;top:8px;right:8px}
+    /* Code color coding */
+    .pathogenic{color:var(--red)}
+    .benign{color:var(--blue)}
+
+    /* Header notes row */
+    .header-notes-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      width:100%;
+    }
+    .note-card{
+      background:rgba(255,255,255,0.9);
+      border:1px solid #dcdcdc;
+      border-radius:8px;
+      padding:8px;
+      color:#111;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .note-card .note-card-top{
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .note-card label{
+      font-size:13px; font-weight:600; color:#111; opacity:0.9; margin:0;
+    }
+    .note-card .expand-btn{
+      padding:4px 8px; font-size:12px; border:1px solid #bbb; background:#fff; border-radius:6px; cursor:pointer; color:#111;
+      white-space:nowrap;
+    }
+    .note-card textarea{
+      width:100%; min-height:56px; max-height:140px; resize:vertical; padding:8px 10px; font-size:14px;
+      border:1px solid #ccc; border-radius:6px; color:#111; background:#fff;
+    }
+
+    /* Settings + Tutorial controls (top-right) */
+    .gear-wrap{
+      position:absolute;top:8px;right:8px;display:flex;gap:8px;align-items:center
+    }
     .gear{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;background:#fff;cursor:pointer;color:black}
-    .settings-panel{position:absolute;right:0;top:44px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:240px;z-index:1200}
+    .tutorial-btn{height:36px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;cursor:pointer;padding:0 10px}
+    .settings-panel{position:absolute;right:0;top:44px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:280px;z-index:1200}
     .settings-panel.hidden{display:none}
     .settings-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:14px;color:#111}
     .settings-row div{flex:1}
@@ -57,12 +94,11 @@
     .selected-item{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;margin:6px 6px 0 0;font-weight:700;transition:background 0.2s ease}
     .selected-item:hover{background:rgba(0,0,0,0.08)!important}
 
-    /* Checklist area */
+    /* Checklist */
     .category{padding:12px;border-radius:8px;margin:12px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
     .category:nth-child(odd){background:#f9fbff}
     .category h2{font-size:18px;margin:0 0 8px;font-weight:900}
 
-    /* Grid: [left | notes | controls] with fixed, shared notes column */
     .code-row{
       display:grid;
       grid-template-columns: minmax(260px, 1fr) var(--note-col) auto;
@@ -74,39 +110,34 @@
 
     .left{min-width:240px;display:flex;flex-direction:column}
     .code-label{font-weight:800;font-size:15px}
-    .desc{
-      font-size:13px;color:#555;margin-top:3px;
-      overflow-wrap:anywhere; word-break:break-word;
-    }
+    .desc{font-size:13px;color:#555;margin-top:3px;overflow-wrap:anywhere; word-break:break-word;}
 
-    /* Notes column (aligned globally by the shared grid column) */
     .code-note{
       width:100%; min-height:44px; resize:vertical; padding:8px;
       border:1px solid #ccc; border-radius:6px; font-size:13px; background:#fff; color:#111
     }
 
-    /* Controls pinned at far right */
+    /* Controls with Bypass pinned right */
     .controls{
-      display:flex; flex-direction:row; gap:8px; align-items:center; flex-wrap:wrap;
-      justify-content:flex-start; justify-self:end;
+      display:flex; flex-direction:row; gap:8px; align-items:center;
+      flex-wrap:nowrap; white-space:nowrap; width:max-content;
     }
-    /* Uniform dropdown sizes everywhere */
+    .controls .spacer{flex:1 1 auto}
     select.level, select.tools{
       padding:6px; border-radius:6px; border:1px solid #bbb; font-weight:700; white-space:nowrap; height:36px;
     }
     select.level{ width:var(--level-w) }
     select.tools{ width:var(--tools-w) }
-
+    .attach{height:36px}
     button.bypass{padding:6px 8px;border-radius:6px;border:1px dashed #666;background:#fff;font-size:13px;cursor:pointer;height:36px}
     button.bypass.active{border-style:solid;background:#eef9ef}
 
-    /* Sticky helpers */
     .sticky{position:sticky;top:0;z-index:1100}
-
-    /* Progress indicator */
     #progressCount{font-size:14px;font-weight:600;color:#fff;background:rgba(0,0,0,0.2);padding:4px 10px;border-radius:20px}
 
-    /* Responsive tweaks */
+    @media (max-width:1200px){
+      .header-notes-grid{ grid-template-columns: 1fr; }
+    }
     @media (max-width:900px){
       .left{min-width:160px}
       .code-row{grid-template-columns: 1fr}
@@ -117,36 +148,115 @@
       #classificationReason{font-size:16px}
     }
 
-    /* === Notes modal (appended) === */
-    .modal-overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,0.45);
-      display:flex; align-items:center; justify-content:center;
-      z-index:1400;
+    /* Thumbnails */
+    .note-wrap{display:flex;flex-direction:column;gap:6px}
+    .thumbs{display:flex;flex-wrap:wrap;gap:8px}
+    .thumb{
+      position:relative;width:96px;height:96px;border:1px solid #ddd;border-radius:6px;
+      overflow:hidden;background:#fafafa;cursor:pointer
     }
-    .modal-overlay.hidden{ display:none }
-    .modal{
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb .remove{
+      position:absolute;top:2px;right:2px;width:20px;height:20px;border:none;border-radius:50%;
+      background:rgba(0,0,0,0.6);color:#fff;line-height:20px;font-size:14px;cursor:pointer
+    }
+    .thumb .rename{
+      position:absolute;bottom:2px;left:2px;width:22px;height:22px;border:none;border-radius:4px;
+      background:rgba(0,0,0,0.55);color:#fff;line-height:22px;font-size:12px;cursor:pointer
+    }
+
+    /* Image Lightbox */
+    .img-lightbox{
+      position:fixed; inset:0; background:rgba(0,0,0,0.85);
+      display:flex; align-items:center; justify-content:center; z-index:1600;
+    }
+    .img-lightbox.hidden{ display:none }
+    .img-viewer{
+      position:relative; width:min(96vw, 1200px); max-height:92vh; display:flex; flex-direction:column;
+      background:#0b0b0b; border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,0.45); overflow:hidden;
+    }
+    .img-bar{
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:10px 12px; color:#eee; background:rgba(255,255,255,0.05)
+    }
+    .img-title{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .img-actions{display:flex; gap:8px; align-items:center}
+    .img-actions a, .img-actions button{
+      padding:6px 10px; border-radius:6px; border:1px solid #666; background:#1d1d1d; color:#eee; cursor:pointer; text-decoration:none
+    }
+    .img-canvas{
+      display:flex; align-items:center; justify-content:center; padding:10px; background:#0b0b0b
+    }
+    .img-canvas img{
+      max-width:96vw; max-height:80vh; object-fit:contain; background:#111; border-radius:6px
+    }
+
+    /* Header field editor modal */
+    .edit-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.45);
+      display:flex; align-items:center; justify-content:center; z-index:1500;
+    }
+    .edit-overlay.hidden{ display:none }
+    .edit-modal{
       width:min(720px, 92vw); max-height:86vh; overflow:auto;
       background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
       display:flex; flex-direction:column;
     }
-    .modal-header{
+    .edit-header{
       display:flex; align-items:center; justify-content:space-between;
       padding:12px 16px; border-bottom:1px solid #eee
     }
-    .modal-close{
-      background:none; border:none; font-size:24px; line-height:1; cursor:pointer
-    }
-    .modal-body{ padding:12px 16px; display:flex; flex-direction:column }
-    .modal-label{ font-size:14px; color:#111; margin:6px 0 6px }
-    .modal-textarea{
-      width:100%; min-height:120px; resize:vertical; padding:10px 12px;
+    .edit-title{font-size:16px; font-weight:700; margin:0}
+    .edit-close{background:none;border:1px solid #ccc;border-radius:50%;width:28px;height:28px;cursor:pointer}
+    .edit-body{padding:12px 16px}
+    .edit-textarea{
+      width:100%; min-height:200px; resize:vertical; padding:10px 12px;
       border:1px solid #ccc; border-radius:8px; font-size:14px; color:#111; background:#fff
     }
-    .modal-actions{
-      display:flex; justify-content:flex-end; gap:8px;
-      padding:12px 16px; border-top:1px solid #eee
+    .edit-actions{display:flex; gap:8px; justify-content:flex-end; padding:12px 16px; border-top:1px solid #eee}
+
+    /* Name attachment modal */
+    .name-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.45);
+      display:flex; align-items:center; justify-content:center; z-index:1550;
+    }
+    .name-overlay.hidden{ display:none }
+    .name-modal{
+      width:min(420px, 92vw); background:#fff; border-radius:10px; box-shadow:0 10px 26px rgba(0,0,0,0.25);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .name-header{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid #eee}
+    .name-title{font-size:15px; font-weight:700; margin:0}
+    .name-close{background:none;border:1px solid #ccc;border-radius:50%;width:26px;height:26px;cursor:pointer}
+    .name-body{padding:12px}
+    .name-input{
+      width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:14px; color:#111;
+    }
+    .name-actions{display:flex; gap:8px; justify-content:flex-end; padding:10px 12px; border-top:1px solid #eee}
+
+    /* Tutorial overlay and popover */
+    .tour-mask{
+      position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:2000;
+    }
+    .tour-mask.hidden{ display:none }
+    .tour-popover{
+      position:fixed; max-width:min(520px, 92vw); background:#fff; color:#111; border-radius:12px; border:1px solid #ddd;
+      box-shadow:0 16px 40px rgba(0,0,0,0.25); z-index:2001; padding:12px; display:flex; flex-direction:column; gap:8px
+    }
+    .tour-popover.hidden{ display:none }
+    .tour-title{font-weight:800; font-size:16px}
+    .tour-body{font-size:14px; line-height:1.4}
+    .tour-actions{display:flex; gap:8px; justify-content:flex-end}
+    .tour-btn{padding:8px 10px;border-radius:8px;border:1px solid #bbb;background:#fff;cursor:pointer}
+    .tour-next{background:#0b5cff;color:#fff;border-color:#0b5cff}
+    .tour-highlight{
+      position:relative; z-index:2002 !important;
+      box-shadow:0 0 0 3px #ffd54d, 0 0 0 8px rgba(255,213,77,0.35);
+      border-radius:6px;
+      transition:box-shadow 0.15s ease;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <div class="header" id="headerContainer">
@@ -154,28 +264,47 @@
       <div class="top-row">
         <input class="variant-name" id="variantName" placeholder="Variant name (e.g. NM_000546.6:c.215C>G / TP53 p.R72P)" />
         <div class="classification" id="classificationArea">
-          <div id="classificationBadge" class="badge" style="background:rgba(230,194,0,0.12);color:var(--yellow)">VUS</div>
+          <div id="classificationBadge" class="badge">VUS</div>
           <div id="classificationReason" class="muted">No decisive combination matched.</div>
         </div>
       </div>
 
-      <div class="patient-notes">
-        <label for="patientNotes">Patient / Case notes </label>
-        <textarea id="patientNotes" placeholder="Add phenotype, family history, inheritance, zygosity, QC flags, relevant labs, etc."></textarea>
+      <!-- Header notes row -->
+      <div class="header-notes-grid">
+        <div class="note-card">
+          <div class="note-card-top">
+            <label for="patientNotes">Patient notes</label>
+            <button class="expand-btn" data-target="patientNotes">Expand</button>
+          </div>
+          <textarea id="patientNotes" placeholder="Phenotype, family history, inheritance, zygosity, QC flags, labs..."></textarea>
+        </div>
+        <div class="note-card">
+          <div class="note-card-top">
+            <label for="geneNotes">Gene notes</label>
+            <button class="expand-btn" data-target="geneNotes">Expand</button>
+          </div>
+          <textarea id="geneNotes" placeholder="Gene-level curation notes (mechanism, hotspots, constraints, known variants)..."></textarea>
+        </div>
+        <div class="note-card">
+          <div class="note-card-top">
+            <label for="recommendationsNotes">Recommendations</label>
+            <button class="expand-btn" data-target="recommendationsNotes">Expand</button>
+          </div>
+          <textarea id="recommendationsNotes" placeholder="Recommendations, follow-up testing, management, referrals..."></textarea>
+        </div>
       </div>
 
-      <div style="display:flex;gap:10px;align-items:center">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <div class="muted">
-          Tip: select codes and choose level. Use ⚙️ for settings.
+          Tip: Consider watching the tutorial (top right corner) for first-time users. Use ⚙️ for settings. 
           • Check <a href="https://cspec.genome.network/cspec/ui/svi/" target="_blank" rel="noopener">ClinGen's registry</a> for gene-specific guidelines before starting.
         </div>
         <div id="progressCount">0 criteria selected</div>
-        <!-- appended: Notes button -->
-        <button id="openNotesBtn" class="btn" type="button" title="Open notes for Gene and Patient recommendations">Notes</button>
       </div>
     </div>
 
     <div class="gear-wrap">
+      <button id="tourBtn" class="tutorial-btn" type="button" title="Open step-by-step tutorial">Tutorial</button>
       <div class="gear" id="gearBtn" title="Settings (pin, export, import, reset)">⚙️</div>
       <div class="settings-panel hidden" id="settingsPanel">
         <div class="settings-row"><div>Pin Header</div><input type="checkbox" id="pinHeader" /></div>
@@ -183,10 +312,10 @@
         <div class="settings-actions">
           <button class="btn" id="clearAllBtn">Clear All Selections</button>
           <button class="btn" id="resetBypassBtn">Reset Bypasses</button>
-          <div style="display:flex;gap:8px">
-            <button class="btn" id="exportBtn">Export (JSON)</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="exportBtn" title="Exports JSON if no screenshots, ZIP if screenshots are attached">Export (JSON)</button>
             <button class="btn" id="importBtn" type="button">Import</button>
-            <input type="file" id="importInput" accept="application/json" style="display:none"/>
+            <input type="file" id="importInput" accept="application/json,application/zip,.zip" style="display:none"/>
           </div>
         </div>
       </div>
@@ -200,7 +329,73 @@
 
   <div id="checklist"></div>
 
+  <!-- Image Lightbox -->
+  <div id="imgLightbox" class="img-lightbox hidden" aria-hidden="true">
+    <div class="img-viewer" role="dialog" aria-modal="true" aria-labelledby="lightboxName">
+      <div class="img-bar">
+        <div id="lightboxName" class="img-title">Attachment</div>
+        <div class="img-actions">
+          <a id="lightboxDownload" href="#" download>Download</a>
+          <a id="lightboxNewTab" href="#" target="_blank" rel="noopener">Open in new tab</a>
+          <button id="imgCloseBtn" type="button" aria-label="Close">×</button>
+        </div>
+      </div>
+      <div class="img-canvas">
+        <img id="lightboxImg" alt="Attachment preview"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header field editor modal -->
+  <div id="editOverlay" class="edit-overlay hidden" aria-hidden="true">
+    <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="edit-header">
+        <h3 id="editTitle" class="edit-title">Edit</h3>
+        <button id="editCloseBtn" class="edit-close" aria-label="Close">×</button>
+      </div>
+      <div class="edit-body">
+        <textarea id="editTextarea" class="edit-textarea"></textarea>
+      </div>
+      <div class="edit-actions">
+        <button id="editSaveBtn" class="btn">Save</button>
+        <button id="editCancelBtn" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Name attachment modal -->
+  <div id="nameOverlay" class="name-overlay hidden" aria-hidden="true">
+    <div class="name-modal" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+      <div class="name-header">
+        <h3 id="nameTitle" class="name-title">Name attachment</h3>
+        <button id="nameCloseBtn" class="name-close" aria-label="Close">×</button>
+      </div>
+      <div class="name-body">
+        <input id="nameInput" class="name-input" type="text" placeholder="Attachment name" />
+      </div>
+      <div class="name-actions">
+        <button id="nameSkipBtn" class="btn" type="button">Skip</button>
+        <button id="nameSaveBtn" class="btn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial overlay and popover -->
+  <div id="tourMask" class="tour-mask hidden" aria-hidden="true"></div>
+  <div id="tourPopover" class="tour-popover hidden" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+    <div id="tourTitle" class="tour-title">Welcome</div>
+    <div id="tourBody" class="tour-body">This is a quick tour of the tool.</div>
+    <div class="tour-actions">
+      <button id="tourBack" class="tour-btn" type="button">Back</button>
+      <button id="tourClose" class="tour-btn" type="button">Close</button>
+      <button id="tourNext" class="tour-btn tour-next" type="button">Next</button>
+    </div>
+  </div>
+
   <script>
+    // ===== Global state that needs to be referenced early =====
+    let tourActive = false; // used in click handler to keep Settings open during tour
+
     // === Configuration ===
     const categories = [
       { name: 'Molecular consequence', codes: [
@@ -254,7 +449,7 @@
       'BS1':['BA1','PM2','PS4'],
       'PM2':['BA1','BS1','PS4'],
       'PS4':['BA1','BS1','PM2'],
-      'PP3':['BP4','PVS1'],
+      'PP3':['BP4','PVS1','PM1'],
       'BP4':['PP3'],
       'PVS1':['PP3','PM4','BP7'],
       'PM4':['PVS1'],
@@ -264,59 +459,29 @@
       'PS3':['BS3'],
       'BS3':['PS3'],
       'PS2':['PM6'],
-      'PM6':['PS2']
+      'PM6':['PS2'],
+      'PM1':['PP3']
     };
 
-    // ========== Tools config (Students: paste your tool links here) ==========
-    // Add your links under each code as an array of { label, url } objects.
     const toolsConfig = {
-      // Molecular consequence
       PVS1: [
         { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
         { label: 'OMIM', url: 'https://www.omim.org/' },
         { label: 'DECIPHER OEUF Scores', url: 'https://www.deciphergenomics.org/' },
         { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
       ],
-      PS1: [
-        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
-      ],
-      PM5: [
-        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
-      ],
+      PS1: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }],
+      PM5: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }],
       PM4: [],
-      PP2: [
-        { label: 'gnomAD z-score', url: 'https://gnomad.broadinstitute.org/' }
-      ],
-      BP1: [
-        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' }
-      ],
-      BP3: [
-        { label: 'RepeatMasker', url: 'https://www.repeatmasker.org/' }
-      ],
-      BP7: [
-        { label: 'Franklin: SpliceAI', url: 'https://franklin.genoox.com/clinical-db/home' }
-      ],
-
-      // Population Data
-      PM2: [
-        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
-      ],
-      BA1: [
-        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
-      ],
-      BS1: [
-        { label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }
-      ],
-
-      // Computational
-      PP3: [
-        { label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }
-      ],
-      BP4: [
-        { label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }
-      ],
-
-      // Functional Studies
+      PP2: [{ label: 'gnomAD z-score', url: 'https://gnomad.broadinstitute.org/' }],
+      BP1: [{ label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' }],
+      BP3: [{ label: 'RepeatMasker', url: 'https://www.repeatmasker.org/' }],
+      BP7: [{ label: 'Franklin: SpliceAI', url: 'https://franklin.genoox.com/clinical-db/home' }],
+      PM2: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      BA1: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      BS1: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      PP3: [{ label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }],
+      BP4: [{ label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }],
       PS3: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
         { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
@@ -331,73 +496,64 @@
         { label: 'ClinGen Evidence Repository', url: 'https://erepo.clinicalgenome.org/evrepo/' },
         { label: 'MAVEdb.org', url: 'https://www.mavedb.org/' }
       ],
-
-      // Case Data - De Novo
       PS2: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
-        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' }, 
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' },
         { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
       ],
       PM6: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
-        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' }, 
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' },
         { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
       ],
-
-      // Case Data - Segregation
       PP1: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
-        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
         { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
       ],
       BS4: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
-        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
         { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
       ],
-
-      // Case Data - Case-control/Prevalence
       PS4: [
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
-        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' }, 
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
         { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
       ],
-      BS2: [
-        { label: 'gnomAD homozygotes', url: 'https://gnomad.broadinstitute.org/' }
-      ],
-
-      // Protein Domain
+      BS2: [{ label: 'gnomAD homozygotes', url: 'https://gnomad.broadinstitute.org/' }],
       PM1: [
         { label: 'UniProt', url: 'https://www.uniprot.org/' },
         { label: 'InterPro', url: 'https://www.ebi.ac.uk/interpro/' },
-        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'MutationMapper', url: 'https://www.cbioportal.org/mutation_mapper/' }
       ],
-
-      // Phenotype/Alternative Molecular Basis
       PM3: [],
-      PP4: [	
-        { label: 'OMIM', url: 'https://www.omim.org/' }, 
+      PP4: [
+        { label: 'OMIM', url: 'https://www.omim.org/' },
         { label: 'HPO', url: 'https://hpo.jax.org/' },
         { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
         { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
       ],
       BP2: [],
-      BP5: [
-        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }
-      ]
+      BP5: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }]
     };
-    // ========================================================================
 
     const checklistDiv = document.getElementById('checklist');
     const codeElements = {};
     const bypassedCodes = new Set();
 
+    // Images per code
+    const imageStore = {}; // { [code]: Array<{name,type,dataUrl,ts}> }
+    function ensureStore(code){ if(!imageStore[code]) imageStore[code] = []; }
+    function hasAnyImages(){ return Object.values(imageStore).some(a => Array.isArray(a) && a.length>0); }
+
     function createToolsDropdown(code){
       const sel = document.createElement('select');
       sel.className = 'tools';
-      sel.title = `Tools for ${code} (configure in toolsConfig)`;
+      sel.title = `Tools for ${code}`;
       const def = document.createElement('option');
-      def.value = ''; def.text = 'Recommended Tools'; def.selected = true;
+      def.value = ''; def.text = 'Tools'; def.selected = true;
       sel.appendChild(def);
       const items = Array.isArray(toolsConfig[code]) ? toolsConfig[code] : [];
       if(items.length){
@@ -407,7 +563,7 @@
         });
       } else {
         const hint = document.createElement('option');
-        hint.value = ''; hint.text = 'Add tools in toolsConfig (JS)'; hint.disabled = true; sel.appendChild(hint);
+        hint.value = ''; hint.text = 'Add tools in toolsConfig'; hint.disabled = true; sel.appendChild(hint);
       }
       sel.addEventListener('change', (e)=>{
         const url = e.target.value;
@@ -429,12 +585,11 @@
         // Left
         const left = document.createElement('div'); left.className='left';
         const topLine = document.createElement('div'); topLine.style.display='flex'; topLine.style.gap='8px'; topLine.style.alignItems='center';
-        const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.id = 'chk_'+item.code; checkbox.style.marginLeft='2px';
+        const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.id = 'chk_'+item.code; checkbox.style.marginLeft = '2px';
         const label = document.createElement('label'); label.className='code-label'; label.htmlFor=checkbox.id;
         label.innerHTML = `<span class='${item.type==='pathogenic'?'pathogenic':'benign'}'>${item.code}</span>`;
         topLine.appendChild(checkbox); topLine.appendChild(label);
 
-        // Description (inject a line break for PS1 to keep row flow consistent)
         const desc = document.createElement('div'); desc.className='desc'; desc.dataset.code = item.code;
         if(item.code === 'PS1'){
           const idx = item.desc.indexOf(' (');
@@ -448,32 +603,58 @@
         } else {
           desc.innerText = item.desc;
         }
-
         left.appendChild(topLine); left.appendChild(desc);
 
-        // Middle (aligned notes)
+        // Middle: notes + thumbs
+        const noteWrap = document.createElement('div'); noteWrap.className='note-wrap';
         const note = document.createElement('textarea'); note.className='code-note'; note.placeholder = `Notes for ${item.code}`;
+        const thumbs = document.createElement('div'); thumbs.className='thumbs';
+        noteWrap.appendChild(note); noteWrap.appendChild(thumbs);
 
-        // Right controls
+        // Right: controls with spacer -> bypass pinned right
         const controls = document.createElement('div'); controls.className='controls';
         const select = document.createElement('select'); select.className='level';
         const placeholder = document.createElement('option'); placeholder.value=''; placeholder.text='Select level'; placeholder.selected=true; select.appendChild(placeholder);
         ['Supporting','Moderate','Strong'].forEach(opt=>{const o=document.createElement('option'); o.value = opt; o.text = opt; select.appendChild(o)});
         const toolsDropdown = createToolsDropdown(item.code);
+        const attachBtn = document.createElement('button'); attachBtn.className='btn attach'; attachBtn.type='button'; attachBtn.textContent='Attach File';
+        const fileInput = document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*'; fileInput.multiple=true; fileInput.style.display='none';
+        const spacer = document.createElement('div'); spacer.className='spacer';
         const bypassBtn = document.createElement('button'); bypassBtn.className='bypass'; bypassBtn.innerText='Bypass'; bypassBtn.style.display='none';
 
-        controls.appendChild(select); controls.appendChild(toolsDropdown); controls.appendChild(bypassBtn);
+        controls.appendChild(select);
+        controls.appendChild(toolsDropdown);
+        controls.appendChild(attachBtn);
+        controls.appendChild(fileInput);
+        controls.appendChild(spacer);
+        controls.appendChild(bypassBtn);
 
-        // Compose row
-        row.appendChild(left); row.appendChild(note); row.appendChild(controls);
+        row.appendChild(left); row.appendChild(noteWrap); row.appendChild(controls);
         wrap.appendChild(row);
 
-        codeElements[item.code] = {row,checkbox,select,bypassBtn,type:item.type,note};
+        codeElements[item.code] = {row,checkbox,select,bypassBtn,type:item.type,note,thumbs,attachBtn,fileInput};
 
         // Events
         checkbox.addEventListener('change',()=>onToggleCode(item.code, checkbox.checked));
         select.addEventListener('change',()=>{ updateSelectedDisplay(); computeClassification(); });
         bypassBtn.addEventListener('click',()=>{ toggleBypass(item.code); });
+
+        attachBtn.addEventListener('click', ()=> fileInput.click());
+        fileInput.addEventListener('change', (ev)=>{
+          addImages(item.code, ev.target.files);
+          ev.target.value = '';
+        });
+
+        note.addEventListener('paste', (ev)=>{
+          const files = ev.clipboardData && ev.clipboardData.files ? ev.clipboardData.files : null;
+          if(files && files.length){ addImages(item.code, files); }
+        });
+        note.addEventListener('dragover', (ev)=>{ ev.preventDefault(); ev.dataTransfer.dropEffect='copy'; });
+        note.addEventListener('drop', (ev)=>{
+          ev.preventDefault();
+          const files = ev.dataTransfer && ev.dataTransfer.files ? ev.dataTransfer.files : null;
+          if(files && files.length){ addImages(item.code, files); }
+        });
       });
 
       checklistDiv.appendChild(wrap);
@@ -624,13 +805,35 @@
     function setClassification(label,reason){
       const badge = document.getElementById('classificationBadge');
       const reasonEl = document.getElementById('classificationReason');
+
+      // Always glassy-white background; tint via border and text color
+      badge.style.background = 'rgba(255,255,255,0.80)';
+      badge.style.borderWidth = '1px';
+      badge.style.borderStyle = 'solid';
+
       reasonEl.innerText = reason || '';
       badge.innerText = label;
-      if(label==='Pathogenic'){ badge.style.background = 'rgba(179,0,0,0.22)'; badge.style.color = 'var(--red)'; }
-      else if(label==='Likely pathogenic'){ badge.style.background = 'rgba(224,123,0,0.12)'; badge.style.color = 'var(--orange)'; }
-      else if(label==='VUS'){ badge.style.background = 'rgba(230,194,0,0.12)'; badge.style.color = 'var(--yellow)'; }
-      else if(label==='Likely benign'){ badge.style.background = 'rgba(11,155,42,0.08)'; badge.style.color = 'var(--green)'; }
-      else if(label==='Benign'){ badge.style.background = 'rgba(0,51,179,0.06)'; badge.style.color = 'var(--white)'; }
+
+      if(label==='Pathogenic'){
+        badge.style.color = 'var(--red)';
+        badge.style.borderColor = 'rgba(179,0,0,0.50)';
+      } else if(label==='Likely pathogenic'){
+        badge.style.color = 'var(--orange)';
+        badge.style.borderColor = 'rgba(224,123,0,0.50)';
+      } else if(label==='VUS'){
+        badge.style.color = 'var(--yellow)';
+        badge.style.borderColor = 'rgba(230,194,0,0.50)';
+      } else if(label==='Likely benign'){
+        badge.style.color = 'var(--green)';
+        badge.style.borderColor = 'rgba(11,155,42,0.40)';
+      } else if(label==='Benign'){
+        badge.style.color = 'var(--blue)';
+        badge.style.borderColor = 'rgba(0,51,179,0.40)';
+      } else {
+        // Fallback
+        badge.style.color = '#111';
+        badge.style.borderColor = 'rgba(0,0,0,0.1)';
+      }
       return {label,reason};
     }
 
@@ -643,7 +846,10 @@
     const selectedBox = document.getElementById('selectedBox');
 
     gearBtn.addEventListener('click', ()=> settingsPanel.classList.toggle('hidden'));
+
+    // Important: don't auto-close Settings while the tutorial is active
     document.addEventListener('click', (e)=>{
+      if(tourActive) return;
       if(!document.getElementById('gearBtn').contains(e.target) && !settingsPanel.contains(e.target)){
         settingsPanel.classList.add('hidden');
       }
@@ -652,6 +858,8 @@
     function updateStickyOffsets(){
       const headerPinned = pinHeader.checked;
       const selectedPinned = pinSelected.checked;
+      headerContainer.classList.toggle('sticky', headerPinned);
+      selectedBox.classList.toggle('sticky', selectedPinned);
       headerContainer.style.zIndex = headerPinned ? 1200 : '';
       if(selectedPinned){
         const headerHeight = headerPinned ? headerContainer.offsetHeight : 0;
@@ -662,302 +870,840 @@
         selectedBox.style.zIndex = '';
       }
     }
-    pinHeader.addEventListener('change', ()=>{ headerContainer.classList.toggle('sticky', pinHeader.checked); updateStickyOffsets(); });
-    pinSelected.addEventListener('change', ()=>{ selectedBox.classList.toggle('sticky', pinSelected.checked); updateStickyOffsets(); });
+    pinHeader.addEventListener('change', updateStickyOffsets);
+    pinSelected.addEventListener('change', updateStickyOffsets);
     window.addEventListener('resize', updateStickyOffsets);
 
-    // Clear/Reset
-    document.getElementById('clearAllBtn').addEventListener('click', ()=>{
-      bypassedCodes.clear();
-      Object.keys(codeElements).forEach(code=>{
-        const e = inst(code);
-        e.checkbox.checked = false; e.select.selectedIndex = 0;
-        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
-        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
-        if(e.note) e.note.value = '';
-      });
-      document.getElementById('patientNotes').value = '';
-      updateSelectedDisplay();
-      computeClassification();
-    });
+    // Lightbox
+    let currentBlobUrl = null;
+    function dataUrlToBlob(dataUrl){
+      const parts = dataUrl.split(',');
+      const header = parts[0];
+      const base64 = parts[1];
+      const mimeMatch = header.match(/data:([^;]+);base64/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+      const bin = atob(base64);
+      const len = bin.length;
+      const u8 = new Uint8Array(len);
+      for(let i=0;i<len;i++){ u8[i] = bin.charCodeAt(i); }
+      return new Blob([u8], {type: mime});
+    }
+    function openImageViewer(dataUrl, name){
+      const overlay = document.getElementById('imgLightbox');
+      const img = document.getElementById('lightboxImg');
+      const title = document.getElementById('lightboxName');
+      const dl = document.getElementById('lightboxDownload');
+      const nt = document.getElementById('lightboxNewTab');
+      if(!overlay || !img || !dl || !nt) return;
+      if(currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+      let blobUrl = dataUrl;
+      if(typeof dataUrl === 'string' && dataUrl.startsWith('data:')){
+        try{ const blob = dataUrlToBlob(dataUrl); blobUrl = URL.createObjectURL(blob); currentBlobUrl = blobUrl; }catch(e){ blobUrl = dataUrl; }
+      }
+      img.src = blobUrl;
+      title.textContent = name || 'Attachment';
+      dl.href = blobUrl; dl.download = name || 'attachment';
+      nt.href = blobUrl; nt.onclick = (e)=>{ e.preventDefault(); try{ window.open(blobUrl, '_blank', 'noopener'); }catch(_){} };
+      overlay.classList.remove('hidden'); overlay.setAttribute('aria-hidden','false');
+    }
+    function closeImageViewer(){
+      const overlay = document.getElementById('imgLightbox');
+      const img = document.getElementById('lightboxImg');
+      overlay.classList.add('hidden'); overlay.setAttribute('aria-hidden','true');
+      if(img) img.src = '';
+      if(currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+    }
+    function wireLightbox(){
+      const overlay = document.getElementById('imgLightbox');
+      const closeBtn = document.getElementById('imgCloseBtn');
+      if(closeBtn && !closeBtn._wired){
+        closeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); closeImageViewer(); });
+        closeBtn._wired = true;
+      }
+      if(overlay && !overlay._wired){
+        overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeImageViewer(); });
+        overlay._wired = true;
+      }
+      if(!document._lbKeydown){
+        document.addEventListener('keydown', (e)=>{
+          const open = overlay && !overlay.classList.contains('hidden');
+          if(open && e.key === 'Escape'){ closeImageViewer(); }
+        });
+        document._lbKeydown = true;
+      }
+      if(!document._lbDelegation){
+        document.addEventListener('click', (e)=>{
+          if(e && e.target && e.target.id === 'imgCloseBtn'){ e.preventDefault(); closeImageViewer(); }
+        }, true);
+        document._lbDelegation = true;
+      }
+    }
 
-    document.getElementById('resetBypassBtn').addEventListener('click', ()=>{
-      bypassedCodes.clear();
-      Object.keys(codeElements).forEach(code=>{
-        const e = inst(code);
-        e.row.classList.remove('disabled'); e.checkbox.disabled=false; e.select.disabled=false;
-        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText = 'Bypass'; e.bypassBtn.style.display = 'none';
-      });
-      Object.keys(codeElements).forEach(master=>{
-        const m = inst(master);
-        if(m && m.checkbox.checked){
-          const conflicts = doubleDips[master] || [];
-          conflicts.forEach(c=> toggleDisableForCode(c,true));
-        }
-      });
-      updateSelectedDisplay();
-      computeClassification();
-    });
+    // Name attachment dialog state and wiring
+    const nameOverlay = document.getElementById('nameOverlay');
+    const nameInput = document.getElementById('nameInput');
+    const nameSaveBtn = document.getElementById('nameSaveBtn');
+    const nameSkipBtn = document.getElementById('nameSkipBtn');
+    const nameCloseBtn = document.getElementById('nameCloseBtn');
+    let nameCtx = { code:null, idx:null };
 
-    // Export/Import
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      const payload = buildExportJSON();
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download = (payload.variant||'variant') + '.json';
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
-    document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
-    document.getElementById('importInput').addEventListener('change', (ev)=>{
-      const file = ev.target.files[0]; if(!file) return;
-      const reader = new FileReader();
-      reader.onload = (e)=>{
-        try{ const data = JSON.parse(e.target.result); applyImportJSON(data); }
-        catch(err){ alert('Invalid JSON file'); }
+    function openNameDialog(code, idx){
+      nameCtx.code = code; nameCtx.idx = idx;
+      const img = imageStore[code]?.[idx];
+      nameInput.value = (img && img.name) ? img.name : '';
+      nameOverlay.classList.remove('hidden');
+      nameOverlay.setAttribute('aria-hidden','false');
+      setTimeout(()=> nameInput.focus(), 0);
+    }
+    function closeNameDialog(){
+      nameOverlay.classList.add('hidden');
+      nameOverlay.setAttribute('aria-hidden','true');
+      nameCtx = {code:null, idx:null};
+    }
+    function saveNameDialog(){
+      const {code, idx} = nameCtx;
+      if(code==null || idx==null) return closeNameDialog();
+      const val = (nameInput.value || '').trim();
+      if(val && imageStore[code] && imageStore[code][idx]){
+        imageStore[code][idx].name = val;
+        renderThumbs(code);
+      }
+      closeNameDialog();
+    }
+    if(nameSaveBtn && !nameSaveBtn._wired){ nameSaveBtn.addEventListener('click', saveNameDialog); nameSaveBtn._wired = true; }
+    const closeNameFn = (e)=>{ e.preventDefault(); closeNameDialog(); };
+    if(nameSkipBtn && !nameSkipBtn._wired){ nameSkipBtn.addEventListener('click', closeNameFn); nameSkipBtn._wired = true; }
+    if(nameCloseBtn && !nameCloseBtn._wired){ nameCloseBtn.addEventListener('click', closeNameFn); nameCloseBtn._wired = true; }
+    if(!nameOverlay._wired){
+      nameOverlay.addEventListener('click', (e)=>{ if(e.target === nameOverlay) closeNameDialog(); });
+      document.addEventListener('keydown', (e)=>{
+        const open = !nameOverlay.classList.contains('hidden');
+        if(open && e.key === 'Escape'){ closeNameDialog(); }
+        if(open && e.key === 'Enter'){ e.preventDefault(); saveNameDialog(); }
+      });
+      nameOverlay._wired = true;
+    }
+
+    // Attachments (per code)
+    function addImages(code, fileList){
+      const files = Array.from(fileList || []).filter(f=> f.type && f.type.startsWith('image/'));
+      if(!files.length) return;
+      const isSingle = files.length === 1;
+      ensureStore(code);
+      files.forEach((file, fileIdx)=>{
+        const reader = new FileReader();
+        reader.onload = (ev)=>{
+          const newIdx = imageStore[code].length;
+          imageStore[code].push({
+            name: file.name || 'attachment',
+            type: file.type || 'image/*',
+            dataUrl: ev.target.result,
+            ts: Date.now()
+          });
+          renderThumbs(code);
+          updateExportButtonLabel();
+          if(isSingle){
+            openNameDialog(code, newIdx);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderThumbs(code){
+      const e = inst(code);
+      if(!e || !e.thumbs) return;
+      const arr = imageStore[code] || [];
+      e.thumbs.innerHTML = '';
+      arr.forEach((img, idx)=>{
+        const d = document.createElement('div'); d.className='thumb';
+        d.title = img.name || 'attachment';
+        const im = document.createElement('img'); im.src = img.dataUrl; im.alt = img.name || 'attachment';
+        const rm = document.createElement('button'); rm.className='remove'; rm.type='button'; rm.textContent='×'; rm.title='Remove';
+        const rn = document.createElement('button'); rn.className='rename'; rn.type='button'; rn.textContent='✎'; rn.title='Rename';
+        rn.addEventListener('click', (ev)=>{ ev.stopPropagation(); openNameDialog(code, idx); });
+        rm.addEventListener('click', (ev)=>{ ev.stopPropagation(); arr.splice(idx,1); renderThumbs(code); updateExportButtonLabel(); });
+        d.addEventListener('click', ()=> openImageViewer(img.dataUrl, img.name));
+        d.appendChild(im); d.appendChild(rn); d.appendChild(rm);
+        e.thumbs.appendChild(d);
+      });
+    }
+
+    // Export metadata (no embedded images for JSON; ZIP stores files separately)
+    function buildExportMetadata(){
+      return {
+        variant: document.getElementById('variantName').value || '',
+        patientNotes: document.getElementById('patientNotes').value || '',
+        geneNotes: document.getElementById('geneNotes').value || '',
+        patientRecommendations: document.getElementById('recommendationsNotes').value || '',
+        criteria: (() => {
+          const arr = [];
+          Object.keys(codeElements).forEach(code=>{
+            const e = inst(code);
+            if(e.checkbox.checked){ arr.push({ code, level: e.select.value || null }); }
+          });
+          return arr;
+        })(),
+        notes: (() => {
+          const o = {};
+          Object.keys(codeElements).forEach(code=>{
+            const e = inst(code);
+            if(e.note && e.note.value && e.note.value.trim()!==''){ o[code] = e.note.value; }
+          });
+          return o;
+        })(),
+        bypasses: Array.from(bypassedCodes),
+        classification: computeClassification()
       };
-      reader.readAsText(file);
-      ev.target.value = '';
-    });
+    }
 
-    function buildExportJSON(){
-      const out = {variant: document.getElementById('variantName').value, patientNotes: document.getElementById('patientNotes').value || '', criteria: [], notes: {}, bypasses: Array.from(bypassedCodes)};
-      Object.keys(codeElements).forEach(code=>{
-        const e = inst(code);
-        if(e.checkbox.checked){ out.criteria.push({code, level: e.select.value || null}); }
-        if(e.note && e.note.value && e.note.value.trim()!==''){ out.notes[code] = e.note.value; }
+    function exportAsJson(){
+      const payload = buildExportMetadata();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const base = (payload.variant || 'variant').replace(/[^a-z0-9_\-\.]+/gi,'_').slice(0,80) || 'variant';
+      a.href = url; a.download = `${base}.json`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function sanitizeFilename(name){
+      return (name || 'image')
+        .replace(/[\\/:*?"<>|]+/g,'_')
+        .replace(/\s+/g,'_')
+        .slice(0,128);
+    }
+
+    function dataUrlToBlob(dataUrl){
+      const parts = dataUrl.split(',');
+      const header = parts[0];
+      const base64 = parts[1];
+      const mimeMatch = header.match(/data:([^;]+);base64/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+      const bin = atob(base64);
+      const len = bin.length;
+      const u8 = new Uint8Array(len);
+      for(let i=0;i<len;i++){ u8[i] = bin.charCodeAt(i); }
+      return new Blob([u8], {type: mime});
+    }
+
+    async function exportAsZip(){
+      if(typeof JSZip === 'undefined'){ alert('ZIP library not loaded.'); return; }
+      const zip = new JSZip();
+
+      const meta = buildExportMetadata();
+      meta.imageFiles = {}; // { code: [{ path, name, type }] }
+
+      const imgRoot = zip.folder('images');
+      const addPromises = [];
+
+      Object.keys(imageStore).forEach(code=>{
+        const imgs = imageStore[code] || [];
+        if(!imgs.length) return;
+        const codeFolder = imgRoot.folder(code);
+        const entries = [];
+        imgs.forEach((img, idx)=>{
+          const safeName = sanitizeFilename(img.name || `image_${idx+1}.png`);
+          const filename = `${(img.ts||Date.now())}_${idx+1}_${safeName}`;
+          const relPath = `images/${code}/${filename}`;
+          entries.push({ path: relPath, name: img.name || safeName, type: img.type || 'image/*' });
+          addPromises.push((async ()=>{
+            try{
+              let blob;
+              if(img.dataUrl && img.dataUrl.startsWith('data:')){ blob = dataUrlToBlob(img.dataUrl); }
+              else { blob = new Blob([], {type: img.type || 'application/octet-stream'}); }
+              codeFolder.file(filename, blob);
+            } catch(e){}
+          })());
+        });
+        meta.imageFiles[code] = entries;
       });
-      out.classification = computeClassification();
-      // appended: include modal notes
-      out.geneNotes = notesState.geneNotes || '';
-      out.patientRecommendations = notesState.patientRecs || '';
-      return out;
+
+      await Promise.all(addPromises);
+      zip.file('metadata.json', JSON.stringify(meta, null, 2));
+
+      const blob = await zip.generateAsync({type:'blob'});
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const base = (meta.variant || 'variant').replace(/[^a-z0-9_\-\.]+/gi,'_').slice(0,80) || 'variant';
+      a.href = url; a.download = `${base}.zip`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
     function applyImportJSON(data){
-      if(data.variant!==undefined) document.getElementById('variantName').value = data.variant || '';
+      if(data.variant !== undefined) document.getElementById('variantName').value = data.variant || '';
       document.getElementById('patientNotes').value = data.patientNotes || '';
+      document.getElementById('geneNotes').value = data.geneNotes || '';
+      document.getElementById('recommendationsNotes').value = data.patientRecommendations || '';
+
+      // Reset UI for criteria
       Object.keys(codeElements).forEach(code=>{
         const e = inst(code);
-        e.checkbox.checked = false; e.select.selectedIndex = 0;
+        e.checkbox.checked = false;
+        e.select.selectedIndex = 0;
         if(e.note) e.note.value = '';
-        e.bypassBtn.classList.remove('active'); e.bypassBtn.innerText='Bypass'; e.bypassBtn.style.display='none';
+        e.row.classList.remove('disabled');
+        e.checkbox.disabled = false;
+        e.select.disabled = false;
+        e.bypassBtn.classList.remove('active');
+        e.bypassBtn.innerText = 'Bypass';
+        e.bypassBtn.style.display = 'none';
       });
       bypassedCodes.clear();
 
-      if(Array.isArray(data.bypasses)){ data.bypasses.forEach(code=>{ if(inst(code)) bypassedCodes.add(code); }); }
+      if(Array.isArray(data.bypasses)){
+        data.bypasses.forEach(code=>{ if(inst(code)) bypassedCodes.add(code); });
+      }
       if(Array.isArray(data.criteria)){
         data.criteria.forEach(item=>{
           const e = inst(item.code);
           if(e){
             e.checkbox.checked = true;
             if(item.level){
-              for(let i=0;i<e.select.options.length;i++){ if(e.select.options[i].value === item.level){ e.select.selectedIndex = i; break } }
+              for(let i=0;i<e.select.options.length;i++){ if(e.select.options[i].value === item.level){ e.select.selectedIndex = i; break; } }
             } else { e.select.selectedIndex = 0; }
           }
         });
       }
       if(data.notes && typeof data.notes === 'object'){
-        Object.keys(data.notes).forEach(code=>{ const e = inst(code); if(e && e.note){ e.note.value = data.notes[code] || ''; } });
+        Object.keys(data.notes).forEach(code=>{
+          const e = inst(code);
+          if(e && e.note){ e.note.value = data.notes[code] || ''; }
+        });
       }
 
-      // appended: load modal notes and update button indicator
-      notesState.geneNotes = data.geneNotes || '';
-      notesState.patientRecs = data.patientRecommendations || '';
-      const notesBtn = document.getElementById('openNotesBtn');
-      if(notesBtn){
-        notesBtn.textContent = (notesState.geneNotes || notesState.patientRecs) ? 'Notes •' : 'Notes';
+      // Reset and load embedded images if provided (legacy JSONs)
+      Object.keys(imageStore).forEach(k=> delete imageStore[k]);
+      if(data.images && typeof data.images === 'object'){
+        Object.keys(data.images).forEach(code=>{
+          if(inst(code)){
+            ensureStore(code);
+            const arr = Array.isArray(data.images[code]) ? data.images[code] : [];
+            imageStore[code] = arr.filter(x=>x && x.dataUrl && x.type && x.name)
+                                  .map(x=>({name:x.name, type:x.type, dataUrl:x.dataUrl, ts:x.ts||Date.now()}));
+          }
+        });
       }
 
+      Object.keys(codeElements).forEach(code=> renderThumbs(code));
       recomputeDisables();
       updateSelectedDisplay();
       computeClassification();
+      updateExportButtonLabel();
     }
 
-    // appended: modal notes state and wiring
-    const notesState = { geneNotes: '', patientRecs: '' };
+    async function importFromZip(file){
+      if(typeof JSZip === 'undefined'){ alert('ZIP library not loaded.'); return; }
+      try{
+        const zip = await JSZip.loadAsync(file);
+        const metaFile = zip.file('metadata.json');
+        if(!metaFile){ alert('metadata.json not found in ZIP'); return; }
+        const metaText = await metaFile.async('string');
+        const metadata = JSON.parse(metaText);
 
-    function openNotes(){
-      const overlay = document.getElementById('notesOverlay');
-      document.getElementById('geneNotesArea').value = notesState.geneNotes || '';
-      document.getElementById('patientRecsArea').value = notesState.patientRecs || '';
-      overlay.classList.remove('hidden');
-      overlay.setAttribute('aria-hidden','false');
-      // ensure autosave listeners are attached each open
-      enableNotesAutosave();
-      setTimeout(()=> document.getElementById('geneNotesArea').focus(), 0);
+        applyImportJSON(metadata);
+
+        if(metadata.imageFiles && typeof metadata.imageFiles === 'object'){
+          const loadPromises = [];
+          Object.keys(metadata.imageFiles).forEach(code=>{
+            const entries = Array.isArray(metadata.imageFiles[code]) ? metadata.imageFiles[code] : [];
+            if(!inst(code)) return;
+            ensureStore(code);
+            entries.forEach(entry=>{
+              const zf = zip.file(entry.path);
+              if(!zf) return;
+              loadPromises.push((async ()=>{
+                const base64 = await zf.async('base64');
+                const type = entry.type || 'image/*';
+                const dataUrl = `data:${type};base64,${base64}`;
+                imageStore[code].push({
+                  name: entry.name || entry.path.split('/').pop() || 'image',
+                  type,
+                  dataUrl,
+                  ts: Date.now()
+                });
+              })());
+            });
+          });
+          await Promise.all(loadPromises);
+          Object.keys(codeElements).forEach(code=> renderThumbs(code));
+        }
+        updateExportButtonLabel();
+      } catch(err){
+        console.error(err);
+        alert('Failed to import ZIP');
+      }
     }
 
-    function closeNotes(){
-      const overlay = document.getElementById('notesOverlay');
-      overlay.classList.add('hidden');
-      overlay.setAttribute('aria-hidden','true');
+    // Wire settings actions
+    (function wireSettingsActions(){
+      const exportSmartBtn = document.getElementById('exportBtn');
+      const importBtn = document.getElementById('importBtn');
+      const importInput = document.getElementById('importInput');
+      const clearAllBtn = document.getElementById('clearAllBtn');
+      const resetBypassBtn = document.getElementById('resetBypassBtn');
+
+      if(exportSmartBtn && !exportSmartBtn._wired){
+        exportSmartBtn.addEventListener('click', ()=>{
+          if(hasAnyImages()){
+            exportAsZip();
+          } else {
+            exportAsJson();
+          }
+        });
+        exportSmartBtn._wired = true;
+      }
+
+      if(importBtn && !importBtn._wired){
+        importBtn.addEventListener('click', ()=> importInput && importInput.click());
+        importBtn._wired = true;
+      }
+      if(importInput && !importInput._wired){
+        importInput.addEventListener('change', (ev)=>{
+          const file = ev.target.files && ev.target.files[0];
+          if(!file) return;
+          const name = (file.name || '').toLowerCase();
+          if(name.endsWith('.zip')){
+            importFromZip(file);
+          } else {
+            const reader = new FileReader();
+            reader.onload = (e)=>{
+              try{
+                const data = JSON.parse(e.target.result);
+                applyImportJSON(data);
+              } catch(err){
+                alert('Invalid JSON file');
+              }
+            };
+            reader.readAsText(file);
+          }
+          ev.target.value = '';
+        });
+        importInput._wired = true;
+      }
+
+      // Clear All: preserve header notes
+      if(clearAllBtn && !clearAllBtn._wired){
+        clearAllBtn.addEventListener('click', ()=>{
+          const patientSaved = document.getElementById('patientNotes').value;
+          const geneSaved = document.getElementById('geneNotes').value;
+          const recSaved = document.getElementById('recommendationsNotes').value;
+
+          bypassedCodes.clear();
+          Object.keys(codeElements).forEach(code=>{
+            const e = inst(code);
+            e.checkbox.checked = false;
+            e.select.selectedIndex = 0;
+            e.row.classList.remove('disabled');
+            e.checkbox.disabled=false;
+            e.select.disabled=false;
+            e.bypassBtn.classList.remove('active');
+            e.bypassBtn.innerText = 'Bypass';
+            e.bypassBtn.style.display = 'none';
+            if(e.note) e.note.value = '';
+            if(imageStore[code]) imageStore[code] = [];
+            renderThumbs(code);
+          });
+
+          document.getElementById('patientNotes').value = patientSaved;
+          document.getElementById('geneNotes').value = geneSaved;
+          document.getElementById('recommendationsNotes').value = recSaved;
+
+          updateSelectedDisplay();
+          computeClassification();
+          updateExportButtonLabel();
+        });
+        clearAllBtn._wired = true;
+      }
+
+      if(resetBypassBtn && !resetBypassBtn._wired){
+        resetBypassBtn.addEventListener('click', ()=>{
+          bypassedCodes.clear();
+          Object.keys(codeElements).forEach(code=>{
+            const e = inst(code);
+            e.row.classList.remove('disabled');
+            e.checkbox.disabled=false;
+            e.select.disabled=false;
+            e.bypassBtn.classList.remove('active');
+            e.bypassBtn.innerText = 'Bypass';
+            e.bypassBtn.style.display = 'none';
+          });
+          Object.keys(codeElements).forEach(master=>{
+            const m = inst(master);
+            if(m && m.checkbox.checked){
+              const conflicts = doubleDips[master] || [];
+              conflicts.forEach(c=> toggleDisableForCode(c,true));
+            }
+          });
+          updateSelectedDisplay();
+          computeClassification();
+        });
+        resetBypassBtn._wired = true;
+      }
+
+      updateExportButtonLabel();
+    })();
+
+    function updateExportButtonLabel(){
+      const exportSmartBtn = document.getElementById('exportBtn');
+      if(!exportSmartBtn) return;
+      exportSmartBtn.textContent = hasAnyImages() ? 'Export (ZIP)' : 'Export (JSON)';
     }
 
-    function wireNotesUI(){
-      const overlay = document.getElementById('notesOverlay');
-      const openBtn = document.getElementById('openNotesBtn');
-      const closeBtn = document.getElementById('closeNotesBtn');
-      const cancelBtn = document.getElementById('cancelNotesBtn');
-      const saveBtn = document.getElementById('saveNotesBtn');
+    // Header field editor (Expand)
+    (function wireHeaderExpand(){
+      const overlay = document.getElementById('editOverlay');
+      const titleEl = document.getElementById('editTitle');
+      const ta = document.getElementById('editTextarea');
+      const saveBtn = document.getElementById('editSaveBtn');
+      const cancelBtn = document.getElementById('editCancelBtn');
+      const closeBtn = document.getElementById('editCloseBtn');
 
-      if(openBtn && !openBtn._wired){
-        openBtn.addEventListener('click', openNotes);
-        openBtn._wired = true;
+      let currentTarget = null;
+      function openEditor(targetId, title){
+        currentTarget = document.getElementById(targetId);
+        if(!currentTarget) return;
+        titleEl.textContent = title || 'Edit';
+        ta.value = currentTarget.value || '';
+        overlay.classList.remove('hidden');
+        overlay.setAttribute('aria-hidden','false');
+        setTimeout(()=> ta.focus(), 0);
       }
-      if(closeBtn && !closeBtn._wired){
-        closeBtn.addEventListener('click', closeNotes);
-        closeBtn._wired = true;
+      function closeEditor(){
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden','true');
+        currentTarget = null;
       }
-      if(cancelBtn && !cancelBtn._wired){
-        cancelBtn.addEventListener('click', closeNotes);
-        cancelBtn._wired = true;
-      }
+
+      document.querySelectorAll('.expand-btn').forEach(btn=>{
+        if(btn._wired) return;
+        btn.addEventListener('click', ()=>{
+          const targetId = btn.getAttribute('data-target');
+          const label = btn.parentElement.querySelector('label')?.textContent?.trim() || 'Edit';
+          openEditor(targetId, label);
+        });
+        btn._wired = true;
+      });
+
       if(saveBtn && !saveBtn._wired){
         saveBtn.addEventListener('click', ()=>{
-          notesState.geneNotes = (document.getElementById('geneNotesArea').value || '').trim();
-          notesState.patientRecs = (document.getElementById('patientRecsArea').value || '').trim();
-          const btn = document.getElementById('openNotesBtn');
-          if(btn){
-            const hasNotes = (notesState.geneNotes || notesState.patientRecs);
-            btn.textContent = hasNotes ? 'Notes • Saved' : 'Notes';
-            // brief confirmation then settle on indicator
-            setTimeout(()=>{ btn.textContent = hasNotes ? 'Notes •' : 'Notes'; }, 1100);
-          }
-          closeNotes();
+          if(currentTarget){ currentTarget.value = ta.value || ''; }
+          closeEditor();
         });
         saveBtn._wired = true;
       }
+      const closeFn = (e)=>{ e.preventDefault(); closeEditor(); };
+      if(cancelBtn && !cancelBtn._wired){ cancelBtn.addEventListener('click', closeFn); cancelBtn._wired = true; }
+      if(closeBtn && !closeBtn._wired){ closeBtn.addEventListener('click', closeFn); closeBtn._wired = true; }
 
-      if(overlay && !overlay._wired){
-        overlay._wired = true;
+      overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeEditor(); });
+      document.addEventListener('keydown', (e)=>{
+        const open = !overlay.classList.contains('hidden');
+        if(open && e.key === 'Escape'){ closeEditor(); }
+      });
+    })();
+
+    // ===============================
+    // Tutorial: on-demand guided tour
+    // ===============================
+    const tourBtn = document.getElementById('tourBtn');
+    const tourMask = document.getElementById('tourMask');
+    const tourPopover = document.getElementById('tourPopover');
+    const tourTitle = document.getElementById('tourTitle');
+    const tourBody = document.getElementById('tourBody');
+    const tourNext = document.getElementById('tourNext');
+    const tourBack = document.getElementById('tourBack');
+    const tourClose = document.getElementById('tourClose');
+
+    let tourIndex = -1;
+    let tourTargetEl = null;
+
+    function getCodeRowByCode(code){
+      const e = inst(code);
+      return e ? e.row : null;
+    }
+
+    function openSettingsPanel(){
+      if(settingsPanel.classList.contains('hidden')){
+        settingsPanel.classList.remove('hidden');
+      }
+    }
+    function closeSettingsPanel(){
+      if(!settingsPanel.classList.contains('hidden')){
+        settingsPanel.classList.add('hidden');
+      }
+    }
+
+    const tourSteps = [
+      {
+        title: 'Variant name',
+        body: 'Start by entering the HGVS or protein change here. This helps anchor your curation.',
+        getEl: () => document.getElementById('variantName')
+      },
+      {
+        title: 'Patient notes',
+        body: 'Capture phenotype, family history, inheritance, zygosity, QC flags, and more. Use “Expand” for a larger editor.',
+        getEl: () => document.getElementById('patientNotes')
+      },
+      {
+        title: 'Gene notes',
+        body: 'Add gene-level context like mechanisms, hotspots, constraint metrics, or known variants.',
+        getEl: () => document.getElementById('geneNotes')
+      },
+      {
+        title: 'Recommendations',
+        body: 'Document recommendations like follow-up testing, management suggestions, and referrals.',
+        getEl: () => document.getElementById('recommendationsNotes')
+      },
+      {
+        title: 'Classification',
+        body: 'The overall classification updates automatically based on your selected criteria.',
+        getEl: () => document.getElementById('classificationBadge')
+      },
+      {
+        title: 'Selected criteria summary',
+        body: 'As you select criteria, they appear here for quick review.',
+        getEl: () => document.getElementById('selectedBox')
+      },
+      {
+        title: 'Criteria checklist',
+        body: 'Each category groups related ACMG/AMP criteria. Read descriptions to guide your evidence selection.',
+        getEl: () => document.querySelector('#checklist .category') || document.getElementById('checklist')
+      },
+      {
+        title: 'Selecting a criterion',
+        body: 'Check a code to select it, then choose the strength level (Supporting/Moderate/Strong).',
+        getEl: () => {
+          const row = getCodeRowByCode('PVS1') || document.querySelector('.code-row');
+          return row ? row.querySelector('input[type="checkbox"]') : null;
+        }
+      },
+      {
+        title: 'Recommended tools',
+        body: 'Jump to helpful resources tailored to each criterion.',
+        getEl: () => {
+          const row = getCodeRowByCode('PVS1') || document.querySelector('.code-row');
+          return row ? row.querySelector('select.tools') : null;
+        }
+      },
+      {
+        title: 'Attach and name screenshots',
+        body: 'Attach screenshots as evidence. Name them on add, or rename later via ✎. Hovering shows the saved name.',
+        getEl: () => {
+          const row = getCodeRowByCode('PVS1') || document.querySelector('.code-row');
+          return row ? row.querySelector('button.attach') : null;
+        }
+      },
+      {
+        title: 'Settings menu',
+        body: 'Find pinning, export/import, and reset options under the gear.',
+        getEl: () => document.getElementById('gearBtn')
+      },
+      // Settings panel walkthrough
+      {
+        title: 'Settings overview',
+        body: 'Settings panel with pinning, session export/import, and quick resets. We’ll step through each.',
+        onEnter: () => openSettingsPanel(),
+        getEl: () => document.getElementById('settingsPanel')
+      },
+      {
+        title: 'Pin Header',
+        body: 'Pin the header to keep the variant and notes visible while scrolling.',
+        getEl: () => document.getElementById('pinHeader')
+      },
+      {
+        title: 'Pin Selected Criteria',
+        body: 'Pin the “Selected Criteria” bar under the header for easy reference.',
+        getEl: () => document.getElementById('pinSelected')
+      },
+      {
+        title: 'Export',
+        body: 'Smart export: downloads JSON if no screenshots, or a ZIP with images if you’ve attached screenshots.',
+        getEl: () => document.getElementById('exportBtn')
+      },
+      {
+        title: 'Import',
+        body: 'Restore a previous session from a JSON or ZIP export.',
+        getEl: () => document.getElementById('importBtn')
+      },
+      {
+        title: 'Clear All Selections',
+        body: 'Reset all selected criteria and notes (header notes are preserved).',
+        getEl: () => document.getElementById('clearAllBtn')
+      },
+      {
+        title: 'Reset Bypasses',
+        body: 'Clear all bypass overrides and reapply standard conflict behavior.',
+        getEl: () => document.getElementById('resetBypassBtn'),
+        onExit: () => closeSettingsPanel()
+      }
+    ];
+
+    function clearHighlight(){
+      if(tourTargetEl){
+        tourTargetEl.classList.remove('tour-highlight');
+        tourTargetEl = null;
+      }
+    }
+
+    function positionPopoverNear(el){
+      const pop = tourPopover;
+      const margin = 12;
+      if(!el){
+        pop.style.top = 'calc(50vh - 140px)';
+        pop.style.left = 'calc(50vw - 220px)';
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+      const popW = Math.min(520, vw - 20);
+      const popH = 180; // approximate
+      let top = rect.bottom + margin;
+      let left = rect.left;
+
+      if(top + popH > vh){ top = rect.top - popH - margin; }
+      if(top < 8){ top = 8; }
+
+      if(left + popW > vw - 8){ left = vw - popW - 8; }
+      if(left < 8){ left = 8; }
+
+      pop.style.top = `${Math.round(top)}px`;
+      pop.style.left = `${Math.round(left)}px`;
+      pop.style.maxWidth = `${popW}px`;
+    }
+
+    function showStep(idx){
+      // Bounds/end
+      if(idx < 0) idx = 0;
+      if(idx >= tourSteps.length){ endTour(); return; }
+
+      // Run onExit of previous step if any
+      if(tourIndex >= 0){
+        const prev = tourSteps[tourIndex];
+        if(prev && typeof prev.onExit === 'function'){
+          try{ prev.onExit(); }catch(e){}
+        }
       }
 
-      document.addEventListener('keydown', (e)=>{
-        if(e.key === 'Escape' && !document.getElementById('notesOverlay').classList.contains('hidden')){
-          closeNotes();
+      // Update index
+      tourIndex = idx;
+
+      const step = tourSteps[idx];
+
+      // onEnter before resolving element (e.g., to open settings)
+      if(step && typeof step.onEnter === 'function'){
+        try{ step.onEnter(); }catch(e){}
+      }
+
+      // Resolve element
+      let el = null;
+      try { el = step.getEl && step.getEl(); } catch(e){ el = null; }
+
+      // Show mask and popover
+      tourMask.classList.remove('hidden');
+      tourMask.setAttribute('aria-hidden','false');
+      tourPopover.classList.remove('hidden');
+
+      // Remove previous highlight
+      clearHighlight();
+
+      // Scroll into view and then highlight
+      if(el && el.scrollIntoView){
+        el.scrollIntoView({behavior:'smooth', block:'center', inline:'nearest'});
+      }
+
+      setTimeout(()=>{
+        if(el && document.body.contains(el)){
+          el.classList.add('tour-highlight');
+          tourTargetEl = el;
+        } else {
+          tourTargetEl = null;
         }
-      }, { once:false });
+        tourTitle.textContent = step.title || `Step ${idx+1}`;
+        tourBody.textContent = step.body || '';
+        positionPopoverNear(tourTargetEl);
+        tourBack.disabled = (idx === 0);
+        tourNext.textContent = (idx === tourSteps.length - 1) ? 'Done' : 'Next';
+      }, 180);
+    }
+
+    function startTour(){
+      if(tourActive) return;
+      tourActive = true;
+      showStep(0);
+      // Reposition on resize/scroll
+      window.addEventListener('resize', onTourRelayout);
+      window.addEventListener('scroll', onTourRelayout, true);
+    }
+
+    function endTour(){
+      // onExit of current step
+      if(tourIndex >= 0){
+        const cur = tourSteps[tourIndex];
+        if(cur && typeof cur.onExit === 'function'){
+          try{ cur.onExit(); }catch(e){}
+        }
+      }
+      tourActive = false;
+      clearHighlight();
+      tourMask.classList.add('hidden');
+      tourMask.setAttribute('aria-hidden','true');
+      tourPopover.classList.add('hidden');
+      // Ensure settings closed after tour
+      closeSettingsPanel();
+      window.removeEventListener('resize', onTourRelayout);
+      window.removeEventListener('scroll', onTourRelayout, true);
+    }
+
+    function onTourRelayout(){
+      if(!tourActive) return;
+      const el = tourSteps[tourIndex]?.getEl?.();
+      if(el !== tourTargetEl){
+        clearHighlight();
+        if(el && document.body.contains(el)){ el.classList.add('tour-highlight'); tourTargetEl = el; }
+        else { tourTargetEl = null; }
+      }
+      positionPopoverNear(tourTargetEl);
+    }
+
+    if(tourBtn && !tourBtn._wired){
+      tourBtn.addEventListener('click', startTour);
+      tourBtn._wired = true;
+    }
+    if(tourNext && !tourNext._wired){
+      tourNext.addEventListener('click', ()=>{
+        if(tourIndex >= tourSteps.length - 1) endTour();
+        else showStep(tourIndex + 1);
+      });
+      tourNext._wired = true;
+    }
+    if(tourBack && !tourBack._wired){
+      tourBack.addEventListener('click', ()=> showStep(tourIndex - 1));
+      tourBack._wired = true;
+    }
+    if(tourClose && !tourClose._wired){
+      tourClose.addEventListener('click', endTour);
+      tourClose._wired = true;
+    }
+    if(!tourMask._wired){
+      tourMask.addEventListener('click', endTour);
+      tourMask._wired = true;
     }
 
     // Initial
     recomputeDisables();
     computeClassification();
     updateStickyOffsets();
-    // Ensure wiring happens after full DOM (including modal markup) is parsed
-    window.addEventListener('DOMContentLoaded', ()=>{
-      wireNotesUI();
-      enableNotesAutosave();
-    });
+    window.addEventListener('resize', updateStickyOffsets);
 
-    // PS1 description line-break applied during element creation above.
-
-    // --- previously appended guards (keep as-is) ---
-    (function enhanceOverlayCloseGuard(){
-      const overlay = document.getElementById('notesOverlay');
-      if(!overlay) return;
-      let downOnOverlay = false;
-
-      const markDown = (e) => { downOnOverlay = (e.target === overlay); };
-      overlay.addEventListener('mousedown', markDown, true);
-      overlay.addEventListener('pointerdown', markDown, true);
-      overlay.addEventListener('touchstart', markDown, { capture:true, passive:true });
-
-      const guardClick = (e) => {
-        if(e.target === overlay && !downOnOverlay){
-          e.stopImmediatePropagation();
-          e.preventDefault();
-        }
-        downOnOverlay = false;
-      };
-      overlay.addEventListener('click', guardClick, true);
-    })();
-
-    (function disableOverlayBackgroundClose(){
-      const overlay = document.getElementById('notesOverlay');
-      if(!overlay) return;
-      const block = (e) => {
-        if (e.target === overlay) {
-          e.stopImmediatePropagation();
-          e.preventDefault();
-        }
-      };
-      overlay.addEventListener('click', block, true);
-      overlay.addEventListener('pointerup', block, true);
-      overlay.addEventListener('mousedown', block, true);
-      overlay.addEventListener('touchend', block, { capture:true, passive:false });
-    })();
-
-    // --- new: strongest guard — block ANY outside-of-modal clicks while open (document capture) ---
-    (function blockOutsideClicksWhileOpen(){
-      const docGuard = (e) => {
-        const overlay = document.getElementById('notesOverlay');
-        if(!overlay || overlay.classList.contains('hidden')) return;
-        const modal = overlay.querySelector('.modal');
-        if(!modal) return;
-        if(!modal.contains(e.target)){
-          e.stopImmediatePropagation();
-          e.preventDefault();
-        }
-      };
-      document.addEventListener('click', docGuard, true);
-      document.addEventListener('pointerup', docGuard, true);
-      document.addEventListener('mousedown', docGuard, true);
-      document.addEventListener('touchend', docGuard, { capture:true, passive:false });
-    })();
-
-    // --- new: autosave notes as user types so accidental closes never lose content ---
-    function updateNotesIndicator(){
-      const btn = document.getElementById('openNotesBtn');
-      if(!btn) return;
-      const hasNotes = (notesState.geneNotes || notesState.patientRecs);
-      btn.textContent = hasNotes ? 'Notes •' : 'Notes';
+    // Ensure lightbox wiring after DOM ready
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', wireLightbox, {once:true});
+    } else {
+      wireLightbox();
     }
-
-    function enableNotesAutosave(){
-      const gene = document.getElementById('geneNotesArea');
-      const recs = document.getElementById('patientRecsArea');
-      if(gene && !gene._autosave){
-        gene.addEventListener('input', ()=>{ notesState.geneNotes = gene.value; updateNotesIndicator(); });
-        gene._autosave = true;
-      }
-      if(recs && !recs._autosave){
-        recs.addEventListener('input', ()=>{ notesState.patientRecs = recs.value; updateNotesIndicator(); });
-        recs._autosave = true;
-      }
-    }
-
-    // --- new: preserve patient/case notes in header when clearing selections ---
-    (function preservePatientNotesOnClear(){
-      const btn = document.getElementById('clearAllBtn');
-      const pn = document.getElementById('patientNotes');
-      if(!btn || !pn) return;
-      let savedValue = '';
-      // Capture the current value before other listeners run
-      btn.addEventListener('click', ()=>{ savedValue = pn.value; }, true);
-      // Restore after the original handler clears it
-      btn.addEventListener('click', ()=>{ setTimeout(()=>{ pn.value = savedValue; }, 0); }, false);
-    })();
   </script>
-
-  <!-- appended: Notes Modal -->
-  <div id="notesOverlay" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
-      <div class="modal-header">
-        <h3 id="notesTitle" style="margin:0;font-size:18px">Notes</h3>
-        <button class="modal-close" id="closeNotesBtn" type="button" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <label for="geneNotesArea" class="modal-label">Gene notes</label>
-        <textarea id="geneNotesArea" class="modal-textarea" placeholder="Add gene-level curation notes (mechanism, hotspots, domain constraints, known variants, etc.)"></textarea>
-
-        <label for="patientRecsArea" class="modal-label" style="margin-top:12px">Patient recommendations</label>
-        <textarea id="patientRecsArea" class="modal-textarea" placeholder="Add recommendations, follow-up testing, management suggestions, referrals, etc."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button id="saveNotesBtn" class="btn" type="button">Save</button>
-        <button id="cancelNotesBtn" class="btn" type="button">Close</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
