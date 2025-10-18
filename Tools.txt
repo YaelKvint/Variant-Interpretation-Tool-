@@ -1,0 +1,75 @@
+const toolsConfig = {
+      PVS1: [
+        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
+        { label: 'OMIM', url: 'https://www.omim.org/' },
+        { label: 'DECIPHER OEUF Scores', url: 'https://www.deciphergenomics.org/' },
+        { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
+      ],
+      PS1: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }],
+      PM5: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }],
+      PM4: [],
+      PP2: [{ label: 'gnomAD z-score', url: 'https://gnomad.broadinstitute.org/' }],
+      BP1: [{ label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' }],
+      BP3: [{ label: 'RepeatMasker', url: 'https://www.repeatmasker.org/' }],
+      BP7: [{ label: 'Franklin: SpliceAI', url: 'https://franklin.genoox.com/clinical-db/home' }],
+      PM2: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      BA1: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      BS1: [{ label: 'gnomAD FAF', url: 'https://gnomad.broadinstitute.org/' }],
+      PP3: [{ label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }],
+      BP4: [{ label: 'Franklin: REVEL', url: 'https://franklin.genoox.com/clinical-db/home' }],
+      PS3: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' },
+        { label: 'ClinGen Evidence Repository', url: 'https://erepo.clinicalgenome.org/evrepo/' },
+        { label: 'MAVEdb.org', url: 'https://www.mavedb.org/' }
+      ],
+      BS3: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' },
+        { label: 'ClinGen Evidence Repository', url: 'https://erepo.clinicalgenome.org/evrepo/' },
+        { label: 'MAVEdb.org', url: 'https://www.mavedb.org/' }
+      ],
+      PS2: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' },
+        { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
+      ],
+      PM6: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/browser' },
+        { label: 'denovo-db', url: 'https://denovo-db.gs.washington.edu/denovo-db/' }
+      ],
+      PP1: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+      BS4: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+      PS4: [
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'Franklin', url: 'https://franklin.genoox.com/clinical-db/home' },
+        { label: 'Mastermind', url: 'https://mastermind.genomenon.com/' }
+      ],
+      BS2: [{ label: 'gnomAD homozygotes', url: 'https://gnomad.broadinstitute.org/' }],
+      PM1: [
+        { label: 'UniProt', url: 'https://www.uniprot.org/' },
+        { label: 'InterPro', url: 'https://www.ebi.ac.uk/interpro/' },
+        { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
+        { label: 'MutationMapper', url: 'https://www.cbioportal.org/mutation_mapper/' }
+      ],
+      PM3: [],
+      PP4: [
+        { label: 'OMIM', url: 'https://www.omim.org/' },
+        { label: 'HPO', url: 'https://hpo.jax.org/' },
+        { label: 'ClinGen Gene-Disease Validity', url: 'https://www.clinicalgenome.org/curation-activities/gene-disease-validity/' },
+        { label: 'GeneReviews', url: 'https://www.ncbi.nlm.nih.gov/books/NBK1116/' }
+      ],
+      BP2: [],
+      BP5: [{ label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' }]
+    };
