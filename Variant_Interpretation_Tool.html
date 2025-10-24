@@ -413,6 +413,9 @@
           {code:'BA1',type:'benign',desc:'Allele frequency is higher than expected for disorder.'},
           {code:'BS1',type:'benign',desc:'Allele frequency greater than expected for disorder .'}
         ]},
+      { name: 'Protein Domain', codes: [
+          {code:'PM1',type:'pathogenic',desc:'Located in a mutational hotspot or critical functional domain without benign variation.'}
+        ]},
       { name: 'Computational', codes: [
           {code:'PP3',type:'pathogenic',desc:'Multiple computational tools predict a deleterious effect.'},
           {code:'BP4',type:'benign',desc:'Multiple computational tools predict no impact.'}
@@ -432,9 +435,6 @@
       { name: 'Case Data - Case-control/Prevalence', codes: [
           {code:'PS4',type:'pathogenic',desc:'Statistically significant increased prevalence in affected vs controls.'},
           {code:'BS2',type:'benign',desc:'Observed in healthy adults with full penetrance expected for the disorder.'}
-        ]},
-      { name: 'Protein Domain', codes: [
-          {code:'PM1',type:'pathogenic',desc:'Located in a mutational hotspot or critical functional domain without benign variation.'}
         ]},
       { name: 'Phenotype/Alternative Molecular Basis', codes: [
           {code:'PM3',type:'pathogenic',desc:'Detected in trans with a pathogenic variant for a recessive disorder.'},
@@ -523,7 +523,8 @@
       ],
       BS2: [{ label: 'gnomAD homozygotes', url: 'https://gnomad.broadinstitute.org/' }],
       PM1: [
-        { label: 'UniProt', url: 'https://www.uniprot.org/' },
+        { label: 'DECIPHER', url: 'https://www.deciphergenomics.org/' },
+	{ label: 'UniProt', url: 'https://www.uniprot.org/' },
         { label: 'InterPro', url: 'https://www.ebi.ac.uk/interpro/' },
         { label: 'ClinVar', url: 'https://www.ncbi.nlm.nih.gov/clinvar/' },
         { label: 'MutationMapper', url: 'https://www.cbioportal.org/mutation_mapper/' }
